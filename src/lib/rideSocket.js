@@ -3,7 +3,7 @@
 import { io } from 'socket.io-client'
 
 const SOCKET_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(
+  process.env.CLIENT_URL?.replace(
     /\/api\/?$/,
     ''
   ) || 'http://localhost:9000'
