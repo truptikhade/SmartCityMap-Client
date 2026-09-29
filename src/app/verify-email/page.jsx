@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+
 import {
   CheckCircle2,
   XCircle,
@@ -13,7 +14,7 @@ import {
 
 import { verifyEmailAPI } from '../../api/auth.api'
 
-export default function VerifyEmailPage() {
+function VerifyEmailForm() {
   const searchParams = useSearchParams()
 
   const [status, setStatus] = useState('verifying')
@@ -62,9 +63,12 @@ export default function VerifyEmailPage() {
     <main className="min-h-screen bg-gray-50">
       <div className="flex min-h-screen items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
+
           {/* LOGO */}
+
           <div className="mb-8 flex justify-center">
             <div className="flex items-center gap-3">
+
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
                 <MapPin size={22} />
               </div>
@@ -72,11 +76,16 @@ export default function VerifyEmailPage() {
               <span className="text-xl font-bold text-gray-950">
                 SmartCity
               </span>
+
             </div>
           </div>
 
           {/* CARD */}
+
           <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+
+            {/* VERIFYING */}
+
             {status === 'verifying' && (
               <>
                 <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
@@ -96,6 +105,8 @@ export default function VerifyEmailPage() {
                 </p>
               </>
             )}
+
+            {/* SUCCESS */}
 
             {status === 'success' && (
               <>
@@ -125,6 +136,8 @@ export default function VerifyEmailPage() {
               </>
             )}
 
+            {/* ERROR */}
+
             {status === 'error' && (
               <>
                 <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
@@ -143,6 +156,7 @@ export default function VerifyEmailPage() {
                 </p>
 
                 <div className="mt-6 space-y-3">
+
                   <Link
                     href="/login"
                     className="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
@@ -156,22 +170,36 @@ export default function VerifyEmailPage() {
                   >
                     Back to SmartCity
                   </Link>
+
                 </div>
               </>
             )}
 
             {/* EMAIL ICON */}
+
             <div className="mt-7 flex items-center justify-center gap-2 text-xs text-gray-400">
               <Mail size={13} />
-              <span>SmartCity Account Verification</span>
+              <span>
+                SmartCity Account Verification
+              </span>
             </div>
+
           </div>
 
           <p className="mt-6 text-center text-xs text-gray-400">
             Secure account verification powered by SmartCity
           </p>
+
         </div>
       </div>
     </main>
+  )
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyEmailForm />
+    </Suspense>
   )
 }
