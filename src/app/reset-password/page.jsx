@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+
 import {
   MapPin,
   Lock,
@@ -13,11 +14,12 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react'
+
 import toast from 'react-hot-toast'
 
 import { resetPasswordAPI } from '../../api/auth.api'
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -101,7 +103,6 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
-
       <div className="w-full max-w-sm">
 
         {/* LOGO */}
@@ -109,12 +110,10 @@ export default function ResetPasswordPage() {
         <div className="mb-8 flex flex-col items-center">
 
           <div className="mb-3 rounded-2xl bg-blue-600 p-3 shadow-sm">
-
             <MapPin
               size={28}
               className="text-white"
             />
-
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-gray-950">
@@ -305,12 +304,10 @@ export default function ResetPasswordPage() {
             <div className="py-4 text-center">
 
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
-
                 <CheckCircle
                   size={24}
                   className="text-green-600"
                 />
-
               </div>
 
               <h2 className="text-lg font-semibold text-gray-950">
@@ -350,7 +347,14 @@ export default function ResetPasswordPage() {
         )}
 
       </div>
-
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordForm />
+    </Suspense>
   )
 }
