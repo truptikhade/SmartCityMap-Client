@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useDispatch } from 'react-redux'
@@ -14,7 +14,7 @@ import {
   Phone,
   Loader2,
   Navigation,
-   Eye,
+  Eye,
   EyeOff,
 } from 'lucide-react'
 
@@ -25,7 +25,7 @@ import {
 
 import { setCredentials } from '../../store/authSlice'
 
-export default function Register() {
+function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const dispatch = useDispatch()
@@ -36,14 +36,15 @@ export default function Register() {
       : 'user'
 
   const [role, setRole] = useState(initialRole)
+
   const [showPassword, setShowPassword] = useState(false)
+
   const [form, setForm] = useState({
     fname: '',
     lname: '',
     email: '',
     phone: '',
     password: '',
-
     licenseNumber: '',
     vehicleNumber: '',
     vehicleType: 'car',
@@ -409,10 +410,10 @@ export default function Register() {
 
                 <input
                   type={
-                  showPassword
-                    ? 'text'
-                    : 'password'
-                }
+                    showPassword
+                      ? 'text'
+                      : 'password'
+                  }
                   name="password"
                   value={form.password}
                   onChange={handleChange}
@@ -420,28 +421,29 @@ export default function Register() {
                   autoComplete="new-password"
                   className="w-full h-11 bg-white border border-gray-200 rounded-xl pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
                 />
-                              <button
-                type="button"
-                onClick={() =>
-                  setShowPassword(
-                    (previous) => !previous
-                  )
-                }
-                disabled={loading}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label={
-                  showPassword
-                    ? 'Hide password'
-                    : 'Show password'
-                }
-                aria-pressed={showPassword}
-              >
-                {showPassword ? (
-                  <EyeOff size={17} />
-                ) : (
-                  <Eye size={17} />
-                )}
-              </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPassword(
+                      (previous) => !previous
+                    )
+                  }
+                  disabled={loading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label={
+                    showPassword
+                      ? 'Hide password'
+                      : 'Show password'
+                  }
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? (
+                    <EyeOff size={17} />
+                  ) : (
+                    <Eye size={17} />
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -508,7 +510,7 @@ export default function Register() {
                     name="vehicleType"
                     value={form.vehicleType}
                     onChange={handleChange}
-                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
                   >
                     <option value="car">
                       Car
@@ -644,5 +646,13 @@ export default function Register() {
 
       </div>
     </div>
+  )
+}
+
+export default function Register() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
   )
 }
