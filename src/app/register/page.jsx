@@ -120,7 +120,7 @@ function RegisterForm() {
           password: form.password,
         })
         toast.success('Account created successfully! Please login.')
-        router.push('/login')
+         router.replace('/login')
         return
       }
 
@@ -139,7 +139,7 @@ function RegisterForm() {
       })
 
       toast.success('Driver account created successfully! Please login.')
-      router.push('/login')
+       router.replace('/login')
     } catch (error) {
       console.error('Registration error:', error)
       toast.error(
