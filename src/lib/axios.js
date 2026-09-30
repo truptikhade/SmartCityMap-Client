@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const API_URL =
-  process.env.CLIENT_URL ||
+  process.env.SERVER_URL ||
   'http://localhost:9000'
 
 console.log('==============================')
