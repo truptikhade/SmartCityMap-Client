@@ -1,35 +1,65 @@
 'use client'
+
 import { useState, useEffect } from 'react'
-import { useDispatch }         from 'react-redux'
-import { setUserLocation }     from '../store/mapSlice'
+import { useDispatch } from 'react-redux'
+import { setUserLocation } from '../store/mapSlice'
 
 export const useLocation = () => {
   const dispatch = useDispatch()
-  const [error, setError]     = useState(null)
+
+  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setError('Geolocation not supported')
+      setError('Geolocation is not supported by this browser')
       setLoading(false)
-      dispatch(setUserLocation({ lat: 19.9975, lng: 73.7898 }))
+      dispatch(setUserLocation(null))
       return
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        dispatch(setUserLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        }))
+        const { latitude, longitude, accuracy } = position.coords
+
+        console.log('Current location:', {
+          latitude,
+          longitude,
+          accuracy,
+        })
+
+        dispatch(
+          setUserLocation({
+            lat: latitude,
+            lng: longitude,
+          })
+        )
+
+        setError(null)
         setLoading(false)
       },
-      () => {
-        dispatch(setUserLocation({ lat: 19.9975, lng: 73.7898 }))
+      (error) => {
+        console.error('Geolocation error:', {
+          code: error.code,
+          message: error.message,
+        })
+
+        setError(error.message)
         setLoading(false)
+
+        // Do NOT use a fake Nashik location
+        dispatch(setUserLocation(null))
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
       }
     )
   }, [dispatch])
 
-  return { error, loading }
+  return {
+    error,
+    loading,
+  }
 }
