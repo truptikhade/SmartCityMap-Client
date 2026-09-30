@@ -22,7 +22,7 @@ export const useSocket = (routeId) => {
 
     // Connect
     socketRef.current = io(
-      process.env.SERVER_URL || 'http://localhost:9000',
+      process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:9000',
       {
         auth:              { token },
         transports:        ['websocket', 'polling'],
