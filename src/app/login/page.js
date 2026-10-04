@@ -92,7 +92,7 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
       <div>
-        <image src={require('login.jpg')}/>
+        <image src={require('./login.jpg')}/>
       </div>
       <div className="w-full max-w-sm">
 
