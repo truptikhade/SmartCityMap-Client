@@ -91,7 +91,9 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
-
+      <div>
+        <image src={require('/Users/trupti/Downloads/SmartCityMap-Client/login.jpg')}/>
+      </div>
       <div className="w-full max-w-sm">
 
         {/* LOGO */}
@@ -146,7 +148,7 @@ export default function Login() {
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder="you@example.com"
+                placeholder="you@email.com"
                 autoComplete="email"
                 disabled={loading}
                 className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50"
