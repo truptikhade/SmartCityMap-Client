@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { useDispatch } from 'react-redux'
 import toast from 'react-hot-toast'
 import Image from 'next/image';
-import loginImg from 'login.jpg'; 
 
 import {
   MapPin,
@@ -94,7 +93,7 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
       <div>
-        <image src={loginImg} alt="Login Banner" priority/>
+        <image src="/login.jpg" alt="Login Banner" priority/>
       </div>
       <div className="w-full max-w-sm">
 
