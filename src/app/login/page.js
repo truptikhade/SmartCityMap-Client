@@ -91,9 +91,17 @@ export default function Login() {
   }
 
   return (
+    
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
-      <div>
-        <image src="/login.jpg" alt="Login Banner" width={500} height={500} />
+      <div className="flex w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl">
+    
+      {/* Left Side: Image (Hidden on mobile, visible on medium screens and up) */}
+      <div className="hidden md:block md:w-1/2">
+        <img 
+          src="/login.jpg" 
+          alt="Login visual" 
+          className="h-full w-full object-cover"
+        />
       </div>
       <div className="w-full max-w-sm">
 
@@ -288,7 +296,7 @@ export default function Login() {
         </div> */}
 
       </div>
-
+    </div>
     </div>
   )
 }
