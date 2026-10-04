@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useDispatch } from 'react-redux'
 import toast from 'react-hot-toast'
 import Image from 'next/image';
-import loginImg from './login.jpg'; 
+import loginImg from 'login.jpg'; 
 
 import {
   MapPin,
