@@ -104,7 +104,6 @@ export default function AIAssistantPanel({lat,lng,onLocate,onClose,}) {
 
           <button type="button" onClick={onClose} aria-label="Close AI assistant" title="Close" className="flex
           h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-800">
-            <RotateCcw size={16} />
             <X size={18} />
           </button>
         </div>
