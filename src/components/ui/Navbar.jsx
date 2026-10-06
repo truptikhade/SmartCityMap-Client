@@ -83,13 +83,13 @@ export default function Navbar() {
                 <span>Login</span>
               </Link>
 
-              <Link
+              {/* <Link
                 href="/register"
                 className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
               >
                 <UserPlus size={16} />
                 <span>Sign up</span>
-              </Link>
+              </Link> */}
             </>
           ) : (
             <>
