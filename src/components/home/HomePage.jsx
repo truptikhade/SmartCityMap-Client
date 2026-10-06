@@ -704,9 +704,9 @@ export default function HomePage() {
                 }
               />
               {/* JOURNEY RESULT */}
-              {/* {journey && (
+              {journey && (
                 <>
-                  <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4">
+                  {/* <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4">
                     <div className="flex items-start gap-3">
                       <div className="mt-1 flex flex-col items-center">
                         <span className="h-2.5 w-2.5 rounded-full bg-green-600" />
@@ -739,7 +739,7 @@ export default function HomePage() {
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                   <TransportOptions
                     journey={journey}
                     onBook={
@@ -750,7 +750,7 @@ export default function HomePage() {
                     }
                   />
                 </>
-              )} */}
+              )}
             </div>
             {/* =================================================
                 MAP AREA
