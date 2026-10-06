@@ -704,7 +704,7 @@ export default function HomePage() {
                 }
               />
               {/* JOURNEY RESULT */}
-              {journey && (
+              {/* {journey && (
                 <>
                   <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4">
                     <div className="flex items-start gap-3">
@@ -750,7 +750,7 @@ export default function HomePage() {
                     }
                   />
                 </>
-              )}
+              )} */}
             </div>
             {/* =================================================
                 MAP AREA
