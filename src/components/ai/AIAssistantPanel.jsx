@@ -35,12 +35,7 @@ export default function AIAssistantPanel({lat,lng,onLocate,onClose,}) {
     setRecommendations([])
 
     try {
-      const response = await getNearbyRecommendationsAPI({
-          lat: Number(lat),
-          lng: Number(lng),
-          message: text,
-        })
-
+      const response = await getNearbyRecommendationsAPI({lat: Number(lat),lng: Number(lng),message: text,})
       const data = response?.data?.data || response?.data || {}
       const nextRecommendations =Array.isArray(data?.recommendations) ? data.recommendations : []
       setMessage(data?.aiMessage || data?.message || `Here are some suggestions for "${text}".`)
@@ -171,7 +166,7 @@ export default function AIAssistantPanel({lat,lng,onLocate,onClose,}) {
 
                           <button type="button" onClick={() => handleShowOnMap( place )}
                             className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-gray-400 
-                            rounded bg-amber-300 transition hover:text-black p-0.5">
+                            rounded bg-mauve-300 transition hover:text-black p-0.5">
                             Map
                           </button>
                         </div>
