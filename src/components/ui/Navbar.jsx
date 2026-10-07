@@ -48,7 +48,10 @@ export default function Navbar() {
     router.replace('/')
   }
 
-  return (
+  const linkClass =
+    'inline-flex items-center gap-3 rounded-md px-1 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-950'
+
+    return (
     <nav className="relative z-50 border-b border-gray-200 bg-white">
       {/* 1. Changed max-w-7xl to w-full and removed mx-auto to stretch to screen edges */}
       <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6">
@@ -143,4 +146,5 @@ export default function Navbar() {
       </div>
     </nav>
   )
+
 }
