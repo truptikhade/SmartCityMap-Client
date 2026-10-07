@@ -49,22 +49,15 @@ export default function Navbar() {
   }
 
   const linkClass =
-    'inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-950'
+    'inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-950'
 
   return (
     <nav className="relative z-50 border-b border-gray-200 bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        {/* Brand */}
-        <Link
-          href={homePath}
-          className="flex items-center gap-2.5"
-          aria-label="SmartCity home"
-        >
-          <MapPinned
-            size={22}
-            className="text-blue-600"
-          />
 
+        {/* Brand */}
+        <Link href={homePath} className="flex items-center gap-2.5" aria-label="SmartCity home">
+          <MapPinned size={22} className="text-blue-600"/>
           <span className="text-base font-semibold tracking-tight text-gray-950">
             {isAdmin ? 'SmartCity Admin' : 'SmartCity'}
           </span>
@@ -75,21 +68,10 @@ export default function Navbar() {
           {!mounted ? null : !authenticated ? (
             <>
               {/* Public visitor navigation */}
-              <Link
-                href="/login"
-                className={linkClass}
-              >
+              <Link href="/login" className={linkClass}>
                 <LogIn size={16} />
                 <span>Login</span>
               </Link>
-
-              {/* <Link
-                href="/register"
-                className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
-              >
-                <UserPlus size={16} />
-                <span>Sign up</span>
-              </Link> */}
             </>
           ) : (
             <>
@@ -147,8 +129,8 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={onLogout}
-                className="ml-1 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
-              >
+                className="ml-1 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold
+                 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900">
                 <LogOut size={16} />
 
                 <span className="hidden sm:inline">
