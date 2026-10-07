@@ -49,14 +49,14 @@ export default function Navbar() {
   }
 
   const linkClass =
-    'inline-flex items-center gap-0.5 rounded-md px-3 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-950'
+    'inline-flex items-center gap-3 rounded-md px-1 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-950'
 
   return (
     <nav className="relative z-50 border-b border-gray-200 bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
 
         {/* Brand */}
-        <Link href={homePath} className="flex items-center gap-1" aria-label="SmartCity home">
+        <Link href={homePath} className="flex items-center gap-2.5" aria-label="SmartCity home">
           <MapPinned size={22} className="text-blue-600"/>
           <span className="text-base font-semibold tracking-tight text-gray-950">
             {isAdmin ? 'SmartCity Admin' : 'SmartCity'}
