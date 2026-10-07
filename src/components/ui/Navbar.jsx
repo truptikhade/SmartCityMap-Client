@@ -64,7 +64,7 @@ export default function Navbar() {
         </Link>
 
         {/* Navigation */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center">
           {!mounted ? null : !authenticated ? (
             <>
               {/* Public visitor navigation */}
