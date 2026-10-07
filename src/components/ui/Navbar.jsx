@@ -49,7 +49,7 @@ export default function Navbar() {
   }
 
   const linkClass =
-    'inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-950'
+    'inline-flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-950'
 
   return (
     <nav className="relative z-50 border-b border-gray-200 bg-white">
