@@ -48,12 +48,10 @@ export default function Navbar() {
     router.replace('/')
   }
 
-  const linkClass =
-    'inline-flex items-center gap-3 rounded-md px-1 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-950'
-
   return (
     <nav className="relative z-50 border-b border-gray-200 bg-white">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+      {/* 1. Changed max-w-7xl to w-full and removed mx-auto to stretch to screen edges */}
+      <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6">
 
         {/* Brand */}
         <Link href={homePath} className="flex items-center gap-2.5" aria-label="SmartCity home">
@@ -64,7 +62,8 @@ export default function Navbar() {
         </Link>
 
         {/* Navigation */}
-        <div className="flex items-center">
+        {/* 2. Added gap-2 to evenly control spacing between nav items without large gaps */}
+        <div className="flex items-center gap-2">
           {!mounted ? null : !authenticated ? (
             <>
               {/* Public visitor navigation */}
@@ -126,10 +125,11 @@ export default function Navbar() {
               </Link>
 
               {/* Logout */}
+              {/* Note: Removed ml-1 since the parent container's gap-2 handles this now */}
               <button
                 type="button"
                 onClick={onLogout}
-                className="ml-1 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold
+                className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold
                  text-gray-500 transition hover:bg-gray-100 hover:text-gray-900">
                 <LogOut size={16} />
 
