@@ -801,7 +801,7 @@ export default function JourneyMapClient({
         center={safeInitialCenter}
         zoom={11}
         scrollWheelZoom
-        className="h-full min-h-[500px] w-full my-1 mx-1"
+        className="h-full min-h-[500px] w-full my-3 mx-3"
       >
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
