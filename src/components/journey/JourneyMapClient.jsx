@@ -804,7 +804,7 @@ export default function JourneyMapClient({
         className="h-full min-h-[500px] w-full"
       >
         <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
+          attribution=" "
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
