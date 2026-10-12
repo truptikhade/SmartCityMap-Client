@@ -796,12 +796,12 @@ export default function JourneyMapClient({
     : null;
 
   return (
-    <div className="relative h-full min-h-[500px] w-full">
+    <div className="relative h-full min-h-[500px] w-full p-7">
       <MapContainer
         center={safeInitialCenter}
         zoom={11}
         scrollWheelZoom
-        className="h-full min-h-[500px] w-full mt-4 mb-4 mx-4"
+        className="h-full min-h-[500px] w-full"
       >
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
