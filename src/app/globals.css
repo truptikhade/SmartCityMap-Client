@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f5f4;
+  --foreground: #1c1917;
 }
 
 @theme inline {
@@ -10,13 +10,54 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-mauve-50: #faf7f9;
+  --color-mauve-100: #f2eaf0;
+  --color-mauve-200: #e6d7e2;
+  --color-mauve-300: #d3bbce;
+  --color-mauve-400: #bb98b4;
+  --color-mauve-500: #a27499;
+  --color-mauve-600: #895b80;
+  --color-mauve-700: #704766;
+  --color-mauve-800: #5b3b53;
+  --color-mauve-900: #4b3346;
+  --color-mauve-950: #2c1c29;
+
+  --color-blue-50: var(--color-mauve-50);
+  --color-blue-100: var(--color-mauve-100);
+  --color-blue-200: var(--color-mauve-200);
+  --color-blue-300: var(--color-mauve-300);
+  --color-blue-400: var(--color-mauve-400);
+  --color-blue-500: var(--color-mauve-500);
+  --color-blue-600: var(--color-mauve-600);
+  --color-blue-700: var(--color-mauve-700);
+  --color-blue-800: var(--color-mauve-800);
+  --color-blue-900: var(--color-mauve-900);
+  --color-blue-950: var(--color-mauve-950);
+
+  --color-indigo-50: var(--color-mauve-50);
+  --color-indigo-100: var(--color-mauve-100);
+  --color-indigo-200: var(--color-mauve-200);
+  --color-indigo-300: var(--color-mauve-300);
+  --color-indigo-400: var(--color-mauve-400);
+  --color-indigo-500: var(--color-mauve-500);
+  --color-indigo-600: var(--color-mauve-600);
+  --color-indigo-700: var(--color-mauve-700);
+  --color-indigo-800: var(--color-mauve-800);
+  --color-indigo-900: var(--color-mauve-900);
+  --color-indigo-950: var(--color-mauve-950);
+
+  --color-gray-50: #faf9f8;
+  --color-gray-100: #f3f0f1;
+  --color-gray-200: #e7e1e5;
+  --color-gray-300: #d5cbd2;
+  --color-gray-400: #a99aa5;
+  --color-gray-500: #796d77;
+  --color-gray-600: #625660;
+  --color-gray-700: #4d424b;
+  --color-gray-800: #352b34;
+  --color-gray-900: #241c23;
+  --color-gray-950: #171116;
 }
 
 body {

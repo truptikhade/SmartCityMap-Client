@@ -1,10 +1,6 @@
-'use client'
+"use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   MapContainer,
@@ -14,38 +10,31 @@ import {
   Polyline,
   ZoomControl,
   useMap,
-} from 'react-leaflet'
+} from "react-leaflet";
 
-import L from 'leaflet'
+import L from "leaflet";
 
 import {
   getLiveAPI,
   getRouteByIdAPI,
   getStopsAPI,
-} from '../../../../api/transit.api'
+} from "../../../../api/transit.api";
 
-import 'leaflet/dist/leaflet.css'
+import "leaflet/dist/leaflet.css";
 
 const defaultIcon = L.icon({
-  iconUrl:
-    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   iconRetinaUrl:
-    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-
-  shadowUrl:
-    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
-
   iconAnchor: [12, 41],
-
   popupAnchor: [1, -34],
-})
+});
 
-const vehicleIcon = (type = 'bus') =>
+const vehicleIcon = (type = "bus") =>
   L.divIcon({
-    className: '',
+    className: "",
 
     html: `
       <div
@@ -62,11 +51,7 @@ const vehicleIcon = (type = 'bus') =>
           font-size:26px;
         "
       >
-        ${
-          type === 'train'
-            ? '🚆'
-            : '🚌'
-        }
+        ${type === "train" ? "🚆" : "🚌"}
       </div>
     `,
 
@@ -75,89 +60,70 @@ const vehicleIcon = (type = 'bus') =>
     iconAnchor: [26, 26],
 
     popupAnchor: [0, -28],
-  })
+  });
 
 function normalizePoint(lat, lng) {
-  const latitude = Number(lat)
-  const longitude = Number(lng)
+  const latitude = Number(lat);
+  const longitude = Number(lng);
 
-  if (
-    !Number.isFinite(latitude) ||
-    !Number.isFinite(longitude)
-  ) {
-    return null
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
   }
 
-  return [
-    latitude,
-    longitude,
-  ]
+  return [latitude, longitude];
 }
 
 function MapController({ point }) {
-  const map = useMap()
+  const map = useMap();
 
   useEffect(() => {
-    if (!point) return
+    if (!point) return;
 
-    map.flyTo(
-      point,
-      Math.max(map.getZoom(), 13),
-      {
-        duration: 0.8,
-      }
-    )
-  }, [map, point])
+    map.flyTo(point, Math.max(map.getZoom(), 13), {
+      duration: 0.8,
+    });
+  }, [map, point]);
 
-  return null
+  return null;
 }
 
-export default function LiveMap({
-  tripId,
-}) {
-  const [live, setLive] =
-    useState(null)
+export default function LiveMap({ tripId }) {
+  const [live, setLive] = useState(null);
 
-  const [route, setRoute] =
-    useState(null)
+  const [route, setRoute] = useState(null);
 
-  const [stops, setStops] =
-    useState([])
+  const [stops, setStops] = useState([]);
 
-  const [loading, setLoading] =
-    useState(true)
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] =
-    useState('')
+  const [error, setError] = useState("");
+  const loadedRouteIdRef = useRef(null);
 
-  // ======================================================
+  //
   // LOAD DATA
-  // ======================================================
+  //
 
   useEffect(() => {
-    if (!tripId) return
+    if (!tripId) return;
 
-    let cancelled = false
+    let cancelled = false;
+    loadedRouteIdRef.current = null;
 
     const load = async () => {
       try {
-        setLoading(true)
-        setError('')
+        setLoading(true);
+        setError("");
 
         /*
          * First get live tracking.
          */
-        const liveResponse =
-          await getLiveAPI(tripId)
+        const liveResponse = await getLiveAPI(tripId);
 
-        const liveData =
-          liveResponse?.data?.data ??
-          liveResponse?.data ??
-          null
+        const liveData = liveResponse?.data?.data ?? liveResponse?.data ?? null;
 
-        if (cancelled) return
+        if (cancelled) return;
 
-        setLive(liveData)
+        setLive(liveData);
 
         /*
          * Live response currently does not
@@ -166,99 +132,106 @@ export default function LiveMap({
          * Therefore use the routeId from
          * the live/trip response if present.
          */
-        const routeId =
-          liveData?.trip?.routeId ||
-          liveData?.routeId
+        const routeId = liveData?.trip?.routeId || liveData?.routeId;
 
         if (!routeId) {
-          return
+          return;
         }
-
-        const [
-          routeResponse,
-          stopsResponse,
-        ] = await Promise.all([
+        const [routeResponse, stopsResponse] = await Promise.all([
           getRouteByIdAPI(routeId),
           getStopsAPI(routeId),
-        ])
+        ]);
 
-        if (cancelled) return
+        if (cancelled) return;
 
-        setRoute(
-          routeResponse?.data?.data ??
-          routeResponse?.data ??
-          null
-        )
+        setRoute(routeResponse?.data?.data ?? routeResponse?.data ?? null);
 
-        setStops(
-          stopsResponse?.data?.data ??
-          stopsResponse?.data ??
-          []
-        )
+        setStops(stopsResponse?.data?.data ?? stopsResponse?.data ?? []);
+        loadedRouteIdRef.current = routeId;
       } catch (err) {
-        if (cancelled) return
+        if (cancelled) return;
 
-        console.error(
-          'Live location error:',
-          err
-        )
+        console.error("Live location error:", err);
 
         setError(
-          err?.response?.data?.message ||
-            'Live location is unavailable'
-        )
+          err?.response?.data?.message || "Live location is unavailable",
+        );
       } finally {
         if (!cancelled) {
-          setLoading(false)
+          setLoading(false);
         }
       }
-    }
+    };
 
-    load()
+    load();
 
     return () => {
-      cancelled = true
-    }
-  }, [tripId])
+      cancelled = true;
+    };
+  }, [tripId]);
 
-  // ======================================================
+  useEffect(() => {
+    if (!tripId) return;
+
+    let cancelled = false;
+    const refreshLiveLocation = async () => {
+      try {
+        const response = await getLiveAPI(tripId);
+        if (cancelled) return;
+        const liveData = response?.data?.data ?? response?.data ?? null;
+        setLive(liveData);
+        setError("");
+
+        const routeId = liveData?.trip?.routeId || liveData?.routeId;
+        if (routeId && loadedRouteIdRef.current !== routeId) {
+          const [routeResponse, stopsResponse] = await Promise.all([
+            getRouteByIdAPI(routeId),
+            getStopsAPI(routeId),
+          ]);
+          if (cancelled) return;
+          setRoute(routeResponse?.data?.data ?? routeResponse?.data ?? null);
+          setStops(stopsResponse?.data?.data ?? stopsResponse?.data ?? []);
+          loadedRouteIdRef.current = routeId;
+        }
+      } catch (err) {
+        if (!cancelled && err?.response?.status !== 404) {
+          console.error("Live location refresh error:", err);
+        }
+      }
+    };
+
+    const intervalId = setInterval(refreshLiveLocation, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [tripId]);
+
+  //
   // LIVE POSITION
-  // ======================================================
+  //
 
-  const vehiclePoint =
-    useMemo(() => {
-      if (!live) return null
+  const vehiclePoint = useMemo(() => {
+    if (!live) return null;
 
-      return normalizePoint(
-        live.currentLat,
-        live.currentLng
-      )
-    }, [live])
+    return normalizePoint(live.currentLat, live.currentLng);
+  }, [live]);
 
-  // ======================================================
+  //
   // ROUTE STOPS
-  // ======================================================
+  //
 
-  const routePoints =
-    useMemo(() => {
-      return stops
-        .map((stop) =>
-          normalizePoint(
-            stop.lat,
-            stop.lng
-          )
-        )
-        .filter(Boolean)
-    }, [stops])
+  const routePoints = useMemo(() => {
+    return stops
+      .map((stop) => normalizePoint(stop.lat, stop.lng))
+      .filter(Boolean);
+  }, [stops]);
 
-  const center =
-    vehiclePoint ||
-    routePoints[0] ||
-    [19.9975, 73.7898]
+  const center = vehiclePoint || routePoints[0] || [19.9975, 73.7898];
 
-  // ======================================================
+  //
   // LOADING
-  // ======================================================
+  //
 
   if (loading) {
     return (
@@ -267,50 +240,41 @@ export default function LiveMap({
           Loading live location...
         </div>
       </div>
-    )
+    );
   }
 
-  // ======================================================
+  //
   // ERROR
-  // ======================================================
+  //
 
   if (error) {
     return (
       <div className="flex h-full items-center justify-center bg-gray-100">
         <div className="rounded-xl bg-white px-6 py-5 text-center shadow">
+          <p className="text-sm font-medium text-red-600">{error}</p>
 
-          <p className="text-sm font-medium text-red-600">
-            {error}
-          </p>
-
-          <p className="mt-1 text-xs text-gray-500">
-            Trip: {tripId}
-          </p>
-
+          <p className="mt-1 text-xs text-gray-500">Trip: {tripId}</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="relative h-full w-full">
-
-<MapContainer
-  center={center}
-  zoom={13}
-  scrollWheelZoom
-  zoomControl={false}
-  className="h-full w-full"
->
-  <ZoomControl position="topright" />
+      <MapContainer
+        center={center}
+        zoom={13}
+        scrollWheelZoom
+        zoomControl={false}
+        className="h-full w-full"
+      >
+        <ZoomControl position="topright" />
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <MapController
-          point={vehiclePoint}
-        />
+        <MapController point={vehiclePoint} />
 
         {/* ================================================
             ROUTE
@@ -320,7 +284,7 @@ export default function LiveMap({
           <Polyline
             positions={routePoints}
             pathOptions={{
-              color: '#111827',
+              color: "#111827",
               weight: 5,
               opacity: 0.75,
             }}
@@ -332,35 +296,23 @@ export default function LiveMap({
         ================================================ */}
 
         {stops.map((stop) => {
-          const point =
-            normalizePoint(
-              stop.lat,
-              stop.lng
-            )
+          const point = normalizePoint(stop.lat, stop.lng);
 
-          if (!point) return null
+          if (!point) return null;
 
           return (
-            <Marker
-              key={stop.id}
-              position={point}
-              icon={defaultIcon}
-            >
+            <Marker key={stop.id} position={point} icon={defaultIcon}>
               <Popup>
                 <div className="min-w-[150px]">
-
-                  <p className="font-semibold">
-                    {stop.stopName}
-                  </p>
+                  <p className="font-semibold">{stop.stopName}</p>
 
                   <p className="mt-1 text-xs text-gray-500">
                     Stop {stop.stopOrder}
                   </p>
-
                 </div>
               </Popup>
             </Marker>
-          )
+          );
         })}
 
         {/* ================================================
@@ -370,40 +322,33 @@ export default function LiveMap({
         {vehiclePoint && (
           <Marker
             position={vehiclePoint}
-            icon={vehicleIcon(
-              route?.transitType
-            )}
+            icon={vehicleIcon(route?.transitType)}
           >
             <Popup>
-
               <div className="min-w-[200px]">
-
                 <p className="font-semibold">
-                  {live?.trip?.vehicleNumber ||
-                    live?.vehicleNumber ||
-                    ' '}
+                  {live?.trip?.vehicleNumber || live?.vehicleNumber || " "}
                 </p>
 
-                <span className="
+                <span
+                  className="
                   mt-1
                   inline-block
                   rounded-full
-                  bg-green-100
+                  bg-amber-100
                   px-2
                   py-0.5
                   text-[10px]
                   font-semibold
-                  text-green-700
-                ">
-                  LIVE
+                  text-amber-800
+                "
+                >
+                  SIMULATED
                 </span>
-
               </div>
-
             </Popup>
           </Marker>
         )}
-
       </MapContainer>
 
       {/* ==================================================
@@ -425,42 +370,32 @@ export default function LiveMap({
           shadow-lg
         "
       >
-
         <div className="flex items-start justify-between gap-3">
-
           <div>
-
-
             <h1 className="mt-1 text-lg font-semibold text-gray-900">
-              {live?.trip?.vehicleNumber ||
-                live?.vehicleNumber ||
-                'Vehicle'}
+              {live?.trip?.vehicleNumber || live?.vehicleNumber || "Vehicle"}
             </h1>
-
           </div>
 
           <span
             className="
               rounded-full
-              bg-green-100
+              bg-amber-100
               px-2.5
               py-1
               text-[10px]
               font-semibold
-              text-green-700
+              text-amber-800
             "
           >
-            LIVE
+            SIMULATED DEMO
           </span>
-
         </div>
 
         {/* Route */}
 
-        {(route?.routeName ||
-          route?.routeNumber) && (
+        {(route?.routeName || route?.routeNumber) && (
           <div className="mt-4 border-t border-gray-100 pt-4">
-
             <p className="text-sm font-medium text-gray-900">
               {route.routeName}
             </p>
@@ -470,7 +405,6 @@ export default function LiveMap({
                 Route {route.routeNumber}
               </p>
             )}
-
           </div>
         )}
 
@@ -478,15 +412,11 @@ export default function LiveMap({
 
         {live?.currentStop && (
           <div className="mt-4">
-
-            <p className="text-xs text-gray-400">
-              Current stop
-            </p>
+            <p className="text-xs text-gray-400">Current stop</p>
 
             <p className="mt-1 text-sm font-medium text-gray-900">
               {live.currentStop.stopName}
             </p>
-
           </div>
         )}
 
@@ -494,15 +424,11 @@ export default function LiveMap({
 
         {live?.nextStop && (
           <div className="mt-3">
-
-            <p className="text-xs text-gray-400">
-              Next stop
-            </p>
+            <p className="text-xs text-gray-400">Next stop</p>
 
             <p className="mt-1 text-sm font-medium text-gray-900">
               {live.nextStop.stopName}
             </p>
-
           </div>
         )}
 
@@ -510,15 +436,11 @@ export default function LiveMap({
 
         {live?.speedKmph != null && (
           <div className="mt-3 flex justify-between text-sm">
-
-            <span className="text-gray-500">
-              Speed
-            </span>
+            <span className="text-gray-500">Speed</span>
 
             <span className="font-medium text-gray-900">
               {live.speedKmph} km/h
             </span>
-
           </div>
         )}
 
@@ -526,15 +448,11 @@ export default function LiveMap({
 
         {live?.delayMinutes != null && (
           <div className="mt-2 flex justify-between text-sm">
-
-            <span className="text-gray-500">
-              Delay
-            </span>
+            <span className="text-gray-500">Delay</span>
 
             <span className="font-medium text-gray-900">
               {live.delayMinutes} min
             </span>
-
           </div>
         )}
 
@@ -542,15 +460,10 @@ export default function LiveMap({
 
         {live?.updatedAt && (
           <p className="mt-4 border-t border-gray-100 pt-3 text-[11px] text-gray-400">
-            Last updated:{' '}
-            {new Date(
-              live.updatedAt
-            ).toLocaleTimeString()}
+            Last updated: {new Date(live.updatedAt).toLocaleTimeString()}
           </p>
         )}
-
       </div>
-
     </div>
-  )
+  );
 }

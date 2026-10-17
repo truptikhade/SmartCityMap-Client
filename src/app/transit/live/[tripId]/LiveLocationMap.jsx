@@ -1,42 +1,34 @@
-'use client'
+"use client";
 
-import { useParams, useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
-import { Home } from 'lucide-react'
+import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import { Home } from "lucide-react";
 
-const LiveMap = dynamic(
-  () => import('./LiveMap'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full items-center justify-center bg-gray-100">
-        <p className="text-sm text-gray-500">
-          Loading map...
-        </p>
-      </div>
-    ),
-  }
-)
+const LiveMap = dynamic(() => import("./LiveMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center bg-gray-100">
+      <p className="text-sm text-gray-500">Loading map...</p>
+    </div>
+  ),
+});
 
 export default function LiveLocationMap() {
-  const params = useParams()
-  const router = useRouter()
+  const params = useParams();
+  const router = useRouter();
 
-  const tripId = params?.tripId
+  const tripId = params?.tripId;
 
   if (!tripId) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-sm text-red-500">
-          Trip ID is missing.
-        </p>
+        <p className="text-sm text-red-500">Trip ID is missing.</p>
       </div>
-    )
+    );
   }
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-gray-100">
-
       <LiveMap tripId={tripId} />
 
       {/* Back button */}
@@ -66,12 +58,8 @@ export default function LiveLocationMap() {
           hover:bg-gray-50
         "
       >
-        <Home
-          size={17}
-        />
-
+        <Home size={17} />
       </button>
-
     </div>
-  )
+  );
 }

@@ -1,10 +1,7 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import {
-  ShieldCheck,
-  X,
-} from 'lucide-react'
+import { useEffect, useState } from "react";
+import { ShieldCheck, X } from "lucide-react";
 
 export default function DriverOtpModal({
   isOpen,
@@ -14,44 +11,36 @@ export default function DriverOtpModal({
   onClose,
   isLoading = false,
 }) {
-  const [localOtp, setLocalOtp] =
-    useState(otp || '')
+  const [localOtp, setLocalOtp] = useState(otp || "");
 
   useEffect(() => {
-    setLocalOtp(otp || '')
-  }, [otp, isOpen])
+    setLocalOtp(otp || "");
+  }, [otp, isOpen]);
 
   if (!isOpen) {
-    return null
+    return null;
   }
 
-  const handleChange = (
-    event
-  ) => {
-    const value =
-      event.target.value
-        .replace(/\D/g, '')
-        .slice(0, 6)
+  const handleChange = (event) => {
+    const value = event.target.value.replace(/\D/g, "").slice(0, 6);
 
-    setLocalOtp(value)
+    setLocalOtp(value);
 
     if (onOtpChange) {
-      onOtpChange(value)
+      onOtpChange(value);
     }
-  }
+  };
 
   const handleVerify = () => {
     if (!/^\d{4,6}$/.test(localOtp)) {
-      return
+      return;
     }
-
-    onVerify(localOtp)
-  }
+    onVerify(localOtp);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
-
         {/* Header */}
 
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
@@ -61,9 +50,7 @@ export default function DriverOtpModal({
             </div>
 
             <div>
-              <h2 className="font-semibold text-gray-900">
-                Verify Passenger
-              </h2>
+              <h2 className="font-semibold text-gray-900">Verify Passenger</h2>
 
               <p className="text-xs text-gray-500">
                 Enter the OTP provided by the passenger
@@ -85,8 +72,8 @@ export default function DriverOtpModal({
 
         <div className="p-6">
           <p className="text-center text-sm text-gray-500">
-            Ask the passenger for the 4–6 digit
-            ride OTP shown in their application.
+            Ask the passenger for the 4–6 digit ride OTP shown in their
+            application.
           </p>
 
           <input
@@ -98,10 +85,8 @@ export default function DriverOtpModal({
             value={localOtp}
             onChange={handleChange}
             onKeyDown={(event) => {
-              if (
-                event.key === 'Enter'
-              ) {
-                handleVerify()
+              if (event.key === "Enter") {
+                handleVerify();
               }
             }}
             placeholder="Enter OTP"
@@ -111,22 +96,15 @@ export default function DriverOtpModal({
           <button
             type="button"
             onClick={handleVerify}
-            disabled={
-              isLoading ||
-              !/^\d{4,6}$/.test(
-                localOtp
-              )
-            }
+            disabled={isLoading || !/^\d{4,6}$/.test(localOtp)}
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ShieldCheck className="h-4 w-4" />
 
-            {isLoading
-              ? 'Verifying...'
-              : 'Verify OTP'}
+            {isLoading ? "Verifying..." : "Verify OTP"}
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }

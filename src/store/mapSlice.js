@@ -1,7 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit";
 
 const mapSlice = createSlice({
-  name: 'map',
+  name: "map",
 
   initialState: {
     userLocation: null,
@@ -20,19 +20,19 @@ const mapSlice = createSlice({
 
   reducers: {
     setUserLocation: (state, action) => {
-      state.userLocation = action.payload
+      state.userLocation = action.payload;
     },
 
     setNearbyPlaces: (state, action) => {
-      state.nearbyPlaces = action.payload
+      state.nearbyPlaces = action.payload;
     },
 
     setSelectedPlace: (state, action) => {
-      state.selectedPlace = action.payload
+      state.selectedPlace = action.payload;
     },
 
     setActiveRoute: (state, action) => {
-      state.activeRoute = action.payload
+      state.activeRoute = action.payload;
     },
 
     // ---------------------------------------------
@@ -40,18 +40,18 @@ const mapSlice = createSlice({
     // ---------------------------------------------
 
     setJourney: (state, action) => {
-      state.journey = action.payload
+      state.journey = action.payload;
     },
 
     setSelectedTransport: (state, action) => {
-      state.selectedTransport = action.payload
+      state.selectedTransport = action.payload;
     },
 
     clearJourney: (state) => {
-      state.journey = null
-      state.selectedTransport = null
-      state.selectedPlace = null
-      state.activeRoute = null
+      state.journey = null;
+      state.selectedTransport = null;
+      state.selectedPlace = null;
+      state.activeRoute = null;
     },
 
     // ---------------------------------------------
@@ -59,14 +59,8 @@ const mapSlice = createSlice({
     // ---------------------------------------------
 
     updateLiveBus: (state, action) => {
-      const {
-        tripId,
-        lat,
-        lng,
-        currentStop,
-        nextStop,
-        speedKmph,
-      } = action.payload
+      const { tripId, lat, lng, currentStop, nextStop, speedKmph } =
+        action.payload;
 
       state.liveBuses[tripId] = {
         lat,
@@ -74,14 +68,14 @@ const mapSlice = createSlice({
         currentStop,
         nextStop,
         speedKmph,
-      }
+      };
     },
 
     clearLiveBuses: (state) => {
-      state.liveBuses = {}
+      state.liveBuses = {};
     },
   },
-})
+});
 
 export const {
   setUserLocation,
@@ -95,6 +89,6 @@ export const {
 
   updateLiveBus,
   clearLiveBuses,
-} = mapSlice.actions
+} = mapSlice.actions;
 
-export default mapSlice.reducer
+export default mapSlice.reducer;

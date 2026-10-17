@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 import {
   Car,
   Clock3,
@@ -8,123 +8,86 @@ import {
   MapPin,
   Navigation,
   User,
-} from 'lucide-react'
-import toast from 'react-hot-toast'
+} from "lucide-react";
+import toast from "react-hot-toast";
 
-import { acceptRideAPI } from '../../api/driver.api'
+import { acceptRideAPI } from "../../api/driver.api";
 
-export default function RideRequestCard({
-  ride,
-  vehicle,
-  onAccepted,
-}) {
-  const [isAccepting, setIsAccepting] =
-    useState(false)
+export default function RideRequestCard({ ride, vehicle, onAccepted }) {
+  const [isAccepting, setIsAccepting] = useState(false);
 
   if (!ride) {
-    return null
+    return null;
   }
 
-  // --------------------------------------------------
+  //
   // Accept ride
-  // --------------------------------------------------
+  //
 
   const handleAccept = async () => {
     if (!vehicle?.id) {
-      toast.error(
-        'No active vehicle is available for this ride'
-      )
+      toast.error("No active vehicle is available for this ride");
 
-      return
+      return;
     }
 
     if (
       ride.vehicleType &&
       vehicle.vehicleType &&
-      ride.vehicleType !==
-        vehicle.vehicleType
+      ride.vehicleType !== vehicle.vehicleType
     ) {
-      toast.error(
-        `This ride requires a ${ride.vehicleType} vehicle`
-      )
+      toast.error(`This ride requires a ${ride.vehicleType} vehicle`);
 
-      return
+      return;
     }
 
     try {
-      setIsAccepting(true)
+      setIsAccepting(true);
 
-      const response =
-        await acceptRideAPI(
-          ride.id,
-          vehicle.id
-        )
+      const response = await acceptRideAPI(ride.id, vehicle.id);
 
-      const acceptedRide =
-        response?.data ||
-        response
+      const acceptedRide = response?.data || response;
 
-      toast.success(
-        'Ride accepted successfully'
-      )
+      toast.success("Ride accepted successfully");
 
       if (onAccepted) {
-        onAccepted(
-          acceptedRide
-        )
+        onAccepted(acceptedRide);
       }
     } catch (error) {
-      console.error(
-        'Accept ride error:',
-        error
-      )
+      console.error("Accept ride error:", error);
 
-      toast.error(
-        error?.response?.data?.message ||
-          'Failed to accept ride'
-      )
+      toast.error(error?.response?.data?.message || "Failed to accept ride");
     } finally {
-      setIsAccepting(false)
+      setIsAccepting(false);
     }
-  }
+  };
 
-  // --------------------------------------------------
+  //
   // Format values
-  // --------------------------------------------------
+  //
 
   const distance =
     ride.distanceKm != null
-      ? `${Number(
-          ride.distanceKm
-        ).toFixed(1)} km`
-      : 'Distance unavailable'
+      ? `${Number(ride.distanceKm).toFixed(1)} km`
+      : "Distance unavailable";
 
   const duration =
     ride.durationMinutes != null
-      ? `${Math.round(
-          Number(
-            ride.durationMinutes
-          )
-        )} min`
-      : 'Duration unavailable'
+      ? `${Math.round(Number(ride.durationMinutes))} min`
+      : "Duration unavailable";
 
   const fare =
     ride.estimatedFare != null
-      ? `₹${Number(
-          ride.estimatedFare
-        ).toFixed(0)}`
-      : 'Fare unavailable'
+      ? `₹${Number(ride.estimatedFare).toFixed(0)}`
+      : "Fare unavailable";
 
-  const passengerName =
-    ride.passenger
-      ? `${ride.passenger.fname || ''} ${
-          ride.passenger.lname || ''
-        }`.trim()
-      : 'Passenger'
+  const passengerName = ride.passenger
+    ? `${ride.passenger.fname || ""} ${ride.passenger.lname || ""}`.trim()
+    : "Passenger";
 
-  // --------------------------------------------------
+  //
   // UI
-  // --------------------------------------------------
+  //
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -139,21 +102,16 @@ export default function RideRequestCard({
           </div>
 
           <div>
-            <h3 className="font-semibold text-gray-900">
-              {passengerName}
-            </h3>
+            <h3 className="font-semibold text-gray-900">{passengerName}</h3>
 
             {ride.passenger?.phone && (
-              <p className="text-sm text-gray-500">
-                {ride.passenger.phone}
-              </p>
+              <p className="text-sm text-gray-500">{ride.passenger.phone}</p>
             )}
           </div>
         </div>
 
         <div className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium capitalize text-gray-700">
-          {ride.vehicleType ||
-            'Ride'}
+          {ride.vehicleType || "Ride"}
         </div>
       </div>
 
@@ -178,8 +136,7 @@ export default function RideRequestCard({
               </p>
 
               <p className="mt-1 text-sm font-medium text-gray-900">
-                {ride.pickup?.address ||
-                  'Pickup location'}
+                {ride.pickup?.address || "Pickup location"}
               </p>
             </div>
           </div>
@@ -197,8 +154,7 @@ export default function RideRequestCard({
               </p>
 
               <p className="mt-1 text-sm font-medium text-gray-900">
-                {ride.destination?.address ||
-                  'Destination'}
+                {ride.destination?.address || "Destination"}
               </p>
             </div>
           </div>
@@ -213,9 +169,7 @@ export default function RideRequestCard({
             <div className="flex items-center gap-1.5 text-gray-400">
               <Navigation className="h-4 w-4" />
 
-              <span className="text-xs">
-                Distance
-              </span>
+              <span className="text-xs">Distance</span>
             </div>
 
             <p className="mt-1 text-sm font-semibold text-gray-900">
@@ -227,9 +181,7 @@ export default function RideRequestCard({
             <div className="flex items-center gap-1.5 text-gray-400">
               <Clock3 className="h-4 w-4" />
 
-              <span className="text-xs">
-                Duration
-              </span>
+              <span className="text-xs">Duration</span>
             </div>
 
             <p className="mt-1 text-sm font-semibold text-gray-900">
@@ -241,14 +193,10 @@ export default function RideRequestCard({
             <div className="flex items-center gap-1.5 text-gray-400">
               <IndianRupee className="h-4 w-4" />
 
-              <span className="text-xs">
-                Fare
-              </span>
+              <span className="text-xs">Fare</span>
             </div>
 
-            <p className="mt-1 text-sm font-semibold text-gray-900">
-              {fare}
-            </p>
+            <p className="mt-1 text-sm font-semibold text-gray-900">{fare}</p>
           </div>
         </div>
 
@@ -263,17 +211,12 @@ export default function RideRequestCard({
             </div>
 
             <div>
-              <p className="text-xs text-gray-500">
-                Your vehicle
-              </p>
+              <p className="text-xs text-gray-500">Your vehicle</p>
 
               <p className="text-sm font-semibold capitalize text-gray-900">
                 {vehicle?.brand
-                  ? `${vehicle.brand} ${
-                      vehicle.model || ''
-                    }`
-                  : vehicle?.vehicleType ||
-                    'Vehicle'}
+                  ? `${vehicle.brand} ${vehicle.model || ""}`
+                  : vehicle?.vehicleType || "Vehicle"}
               </p>
             </div>
           </div>
@@ -292,22 +235,17 @@ export default function RideRequestCard({
         <button
           type="button"
           onClick={handleAccept}
-          disabled={
-            isAccepting ||
-            !vehicle?.id
-          }
+          disabled={isAccepting || !vehicle?.id}
           className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isAccepting ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-
               Accepting...
             </>
           ) : (
             <>
               <Navigation className="h-4 w-4" />
-
               Accept Ride
             </>
           )}
@@ -315,12 +253,11 @@ export default function RideRequestCard({
 
         {!vehicle?.id && (
           <p className="mt-2 text-center text-xs text-red-500">
-            No active vehicle found. Please
-            activate a vehicle before accepting
+            No active vehicle found. Please activate a vehicle before accepting
             rides.
           </p>
         )}
       </div>
     </div>
-  )
+  );
 }

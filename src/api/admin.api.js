@@ -1,79 +1,61 @@
-import api from '../lib/axios'
+import api from "../lib/axios";
 
-// --------------------------------------------------
+export const createTransitScheduleAPI = async (schedule) => {
+  const response = await api.post("/api/admin/transit/schedules", schedule);
+
+  return response.data;
+};
+
+//
 // DRIVERS
-// --------------------------------------------------
+//
 
-export const getAllDriversAPI =
-  async () => {
-    const response =
-      await api.get(
-        '/api/admin/drivers'
-      )
+export const getAllDriversAPI = async () => {
+  const response = await api.get("/api/admin/drivers");
 
-    return response.data
-  }
+  return response.data;
+};
 
-export const getDriverByIdAPI =
-  async (driverId) => {
-    const response =
-      await api.get(
-        `/api/admin/drivers/${driverId}`
-      )
+export const getDriverByIdAPI = async (driverId) => {
+  const response = await api.get(`/api/admin/drivers/${driverId}`);
 
-    return response.data
-  }
+  return response.data;
+};
 
-export const approveDriverAPI =
-  async (driverId) => {
-    const response =
-      await api.put(
-        `/api/admin/drivers/${driverId}/approve`
-      )
+export const approveDriverAPI = async (driverId) => {
+  const response = await api.put(`/api/admin/drivers/${driverId}/approve`);
 
-    return response.data
-  }
+  return response.data;
+};
 
-export const rejectDriverAPI =
-  async (driverId) => {
-    const response =
-      await api.put(
-        `/api/admin/drivers/${driverId}/reject`
-      )
+export const rejectDriverAPI = async (driverId) => {
+  const response = await api.put(`/api/admin/drivers/${driverId}/reject`);
 
-    return response.data
-  }
+  return response.data;
+};
 
-// --------------------------------------------------
+//
 // VEHICLE CHANGE REQUESTS
-// --------------------------------------------------
+//
 
-export const getPendingVehicleChangeRequestsAPI =
-  async () => {
-    const response =
-      await api.get(
-        '/api/admin/vehicle-change-requests'
-      )
+export const getPendingVehicleChangeRequestsAPI = async () => {
+  const response = await api.get("/api/admin/vehicle-change-requests");
 
-    return response.data
-  }
+  return response.data;
+};
 
-export const approveVehicleChangeRequestAPI =
-  async (requestId) => {
-    const response =
-      await api.put(
-        `/api/admin/vehicle-change-requests/${requestId}/approve`
-      )
+export const approveVehicleChangeRequestAPI = async (requestId) => {
+  const response = await api.put(
+    `/api/admin/vehicle-change-requests/${requestId}/approve`,
+  );
 
-    return response.data
-  }
+  return response.data;
+};
 
-export const rejectVehicleChangeRequestAPI =
-  async (requestId) => {
-    const response =
-      await api.put(
-        `/api/admin/vehicle-change-requests/${requestId}/reject`
-      )
+export const rejectVehicleChangeRequestAPI = async (requestId) => {
+  const response = await api.put(
+    `/api/admin/vehicle-change-requests/${requestId}/reject`,
+  );
 
-    return response.data
-  }
+  return response.data;
+};

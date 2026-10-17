@@ -1,145 +1,155 @@
-'use client'
+"use client";
 
-import { useEffect, useRef, useState } from 'react'
-import { ArrowDownUp, Clock3, Loader2, MapPin, LocateFixed } from 'lucide-react'
-import toast from 'react-hot-toast'
-import { searchJourneyAPI } from '../../api/transit.api'
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowDownUp,
+  CalendarDays,
+  Clock3,
+  Loader2,
+  MapPin,
+  LocateFixed,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { searchJourneyAPI } from "../../api/transit.api";
+import { getLocalDateInput } from "../../lib/dateInput";
 
-const RECENT_SEARCHES_KEY = 'smartcity_recent_searches'
-const MAX_RECENT_SEARCHES = 5
+const RECENT_SEARCHES_KEY = "smartcity_recent_searches";
+const MAX_RECENT_SEARCHES = 5;
 
-// ======================================================
+//
 // NOMINATIM SEARCH
-// ======================================================
+//
 const nominatimSearch = async (query) => {
   const response = await fetch(
     `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=in&q=${encodeURIComponent(
-      query
+      query,
     )}`,
     {
       headers: {
-        Accept: 'application/json',
+        Accept: "application/json",
       },
-    }
-  )
+    },
+  );
 
   if (!response.ok) {
-    throw new Error('Location search failed')
+    throw new Error("Location search failed");
   }
 
-  return response.json()
-}
+  return response.json();
+};
 
-// ======================================================
+//
 // REVERSE GEOCODING
-// ======================================================
+//
 const reverseGeocode = async (lat, lng) => {
   const response = await fetch(
     `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(
-      lat
+      lat,
     )}&lon=${encodeURIComponent(
-      lng
+      lng,
     )}&zoom=18&addressdetails=1&accept-language=en`,
     {
       headers: {
-        Accept: 'application/json',
+        Accept: "application/json",
       },
-    }
-  )
+    },
+  );
 
   if (!response.ok) {
-    throw new Error('Reverse geocoding failed')
+    throw new Error("Reverse geocoding failed");
   }
 
-  return response.json()
-}
+  return response.json();
+};
 
-// ======================================================
+//
 // COMPONENT
-// ======================================================
+//
 export default function JourneySearch({
   onSearch,
   onClear,
-  initialFrom = '',
-  initialTo = '',
+  initialFrom = "",
+  initialTo = "",
   currentLocation = null,
 }) {
   // ====================================================
   // STATE
   // ====================================================
-  const [from, setFrom] = useState(initialFrom)
-  const [to, setTo] = useState(initialTo)
-  const [fromResults, setFromResults] = useState([])
-  const [toResults, setToResults] = useState([])
-  const [fromPlace, setFromPlace] = useState(null)
-  const [toPlace, setToPlace] = useState(null)
-  const [currentLocationPlace, setCurrentLocationPlace] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [searchingField, setSearchingField] = useState(null)
-  const [recentSearches, setRecentSearches] = useState([])
-  const [showRecentSearches, setShowRecentSearches] = useState(false)
-  const [activeField, setActiveField] = useState(null)
-  const [resolvingCurrentLocation, setResolvingCurrentLocation] = useState(false)
+  const [from, setFrom] = useState(initialFrom);
+  const [to, setTo] = useState(initialTo);
+  const [fromResults, setFromResults] = useState([]);
+  const [toResults, setToResults] = useState([]);
+  const [fromPlace, setFromPlace] = useState(null);
+  const [toPlace, setToPlace] = useState(null);
+  const [travelDate, setTravelDate] = useState(getLocalDateInput());
+  const [currentLocationPlace, setCurrentLocationPlace] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [searchingField, setSearchingField] = useState(null);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [showRecentSearches, setShowRecentSearches] = useState(false);
+  const [activeField, setActiveField] = useState(null);
+  const [resolvingCurrentLocation, setResolvingCurrentLocation] =
+    useState(false);
 
-  const containerRef = useRef(null)
-  const currentLocationInitialized = useRef(false)
+  const containerRef = useRef(null);
+  const currentLocationInitialized = useRef(false);
 
   // ====================================================
   // LOAD RECENT SEARCHES
   // ====================================================
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(RECENT_SEARCHES_KEY)
-      if (!saved) return
-      const parsed = JSON.parse(saved)
+      const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
+      if (!saved) return;
+      const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
-        setRecentSearches(parsed)
+        setRecentSearches(parsed);
       }
     } catch (error) {
-      console.error('Failed to load recent searches:', error)
+      console.error("Failed to load recent searches:", error);
     }
-  }, [])
+  }, []);
 
   // ====================================================
   // CURRENT LOCATION FOR DROPDOWN ONLY
   // ====================================================
   useEffect(() => {
-    if (!currentLocation) return
+    if (!currentLocation) return;
 
-    const lat = Number(currentLocation.lat)
-    const lng = Number(currentLocation.lng)
+    const lat = Number(currentLocation.lat);
+    const lng = Number(currentLocation.lng);
 
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
     const loadCurrentLocation = async () => {
       try {
-        setResolvingCurrentLocation(true)
-        const result = await reverseGeocode(lat, lng)
+        setResolvingCurrentLocation(true);
+        const result = await reverseGeocode(lat, lng);
         const name =
-          result?.display_name?.split(',').slice(0, 2).join(',').trim() ||
-          'Your current location'
+          result?.display_name?.split(",").slice(0, 2).join(",").trim() ||
+          "Your current location";
 
         setCurrentLocationPlace({
           name,
           lat,
           lng,
           isCurrentLocation: true,
-        })
+        });
       } catch (error) {
-        console.error('Current location reverse geocoding error:', error)
+        console.error("Current location reverse geocoding error:", error);
         setCurrentLocationPlace({
-          name: 'Your current location',
+          name: "Your current location",
           lat,
           lng,
           isCurrentLocation: true,
-        })
+        });
       } finally {
-        setResolvingCurrentLocation(false)
+        setResolvingCurrentLocation(false);
       }
-    }
+    };
 
-    loadCurrentLocation()
-  }, [currentLocation])
+    loadCurrentLocation();
+  }, [currentLocation]);
 
   // ====================================================
   // CLOSE DROPDOWNS ON OUTSIDE CLICK
@@ -150,83 +160,77 @@ export default function JourneySearch({
         containerRef.current &&
         !containerRef.current.contains(event.target)
       ) {
-        setShowRecentSearches(false)
-        setFromResults([])
-        setToResults([])
+        setShowRecentSearches(false);
+        setFromResults([]);
+        setToResults([]);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleOutsideClick)
+    document.addEventListener("mousedown", handleOutsideClick);
     return () => {
-      document.removeEventListener('mousedown', handleOutsideClick)
-    }
-  }, [])
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   // ====================================================
   // SEARCH LOCATION
   // ====================================================
   const searchLocation = async (value, field) => {
     if (value.trim().length < 3) {
-      if (field === 'from') {
-        setFromResults([])
+      if (field === "from") {
+        setFromResults([]);
       } else {
-        setToResults([])
+        setToResults([]);
       }
-      return
+      return;
     }
 
-    setSearchingField(field)
+    setSearchingField(field);
     try {
-      const results = await nominatimSearch(value)
-      if (field === 'from') {
-        setFromResults(results)
+      const results = await nominatimSearch(value);
+      if (field === "from") {
+        setFromResults(results);
       } else {
-        setToResults(results)
+        setToResults(results);
       }
     } catch (error) {
-      console.error('Location search error:', error)
-      toast.error('Could not search that location')
+      console.error("Location search error:", error);
+      toast.error("Could not search that location");
     } finally {
-      setSearchingField(null)
+      setSearchingField(null);
     }
-  }
+  };
 
   // ====================================================
   // SELECT NOMINATIM PLACE
   // ====================================================
   const selectPlace = (place, field) => {
     const selected = {
-      name: place.display_name.split(',').slice(0, 2).join(',').trim(),
+      name: place.display_name.split(",").slice(0, 2).join(",").trim(),
       lat: Number(place.lat),
       lng: Number(place.lon),
-    }
+    };
 
-    if (field === 'from') {
-      setFrom(selected.name)
-      setFromPlace(selected)
-      setFromResults([])
+    if (field === "from") {
+      setFrom(selected.name);
+      setFromPlace(selected);
+      setFromResults([]);
     } else {
-      setTo(selected.name)
-      setToPlace(selected)
-      setToResults([])
+      setTo(selected.name);
+      setToPlace(selected);
+      setToResults([]);
     }
-
-    setShowRecentSearches(false)
-  }
+    setShowRecentSearches(false);
+  };
 
   // ====================================================
   // SAVE RECENT SEARCH
   // ====================================================
   const saveRecentSearch = (origin, destination) => {
-    if (!origin || !destination) return
+    if (!origin || !destination) return;
 
     const newSearch = {
-      id: [
-        origin.lat,
-        origin.lng,
-        destination.lat,
-        destination.lng,
-      ].join('-'),
+      id: [origin.lat, origin.lng, destination.lat, destination.lng].join("-"),
       from: {
         name: origin.name,
         lat: origin.lat,
@@ -238,75 +242,74 @@ export default function JourneySearch({
         lng: destination.lng,
       },
       createdAt: Date.now(),
-    }
+    };
 
-    const existing = recentSearches.filter((item) => item.id !== newSearch.id)
-    const updated = [newSearch, ...existing].slice(0, MAX_RECENT_SEARCHES)
-
-    setRecentSearches(updated)
+    const existing = recentSearches.filter((item) => item.id !== newSearch.id);
+    const updated = [newSearch, ...existing].slice(0, MAX_RECENT_SEARCHES);
+    setRecentSearches(updated);
 
     try {
-      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated))
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
     } catch (error) {
-      console.error('Failed to save recent search:', error)
+      console.error("Failed to save recent search:", error);
     }
-  }
+  };
 
   // ====================================================
   // SELECT RECENT SEARCH
   // ====================================================
   const handleRecentSearch = (recent) => {
-    if (!recent?.from || !recent?.to) return
+    if (!recent?.from || !recent?.to) return;
 
-    setFrom(recent.from.name)
-    setTo(recent.to.name)
-    setFromPlace(recent.from)
-    setToPlace(recent.to)
-    setFromResults([])
-    setToResults([])
-    setShowRecentSearches(false)
-  }
+    setFrom(recent.from.name);
+    setTo(recent.to.name);
+    setFromPlace(recent.from);
+    setToPlace(recent.to);
+    setFromResults([]);
+    setToResults([]);
+    setShowRecentSearches(false);
+  };
 
   // ====================================================
   // SWAP
   // ====================================================
   const swap = () => {
-    const oldFrom = from
-    const oldTo = to
-    const oldFromPlace = fromPlace
-    const oldToPlace = toPlace
+    const oldFrom = from;
+    const oldTo = to;
+    const oldFromPlace = fromPlace;
+    const oldToPlace = toPlace;
 
-    setFrom(oldTo)
-    setTo(oldFrom)
-    setFromPlace(oldToPlace)
-    setToPlace(oldFromPlace)
-    setFromResults([])
-    setToResults([])
-    setShowRecentSearches(false)
-  }
+    setFrom(oldTo);
+    setTo(oldFrom);
+    setFromPlace(oldToPlace);
+    setToPlace(oldFromPlace);
+    setFromResults([]);
+    setToResults([]);
+    setShowRecentSearches(false);
+  };
 
   // ====================================================
   // CLEAR
   // ====================================================
   const handleClear = () => {
-    setFrom('')
-    setTo('')
-    setFromPlace(null)
-    setToPlace(null)
-    setFromResults([])
-    setToResults([])
-    setShowRecentSearches(false)
-    currentLocationInitialized.current = false
-    onClear?.()
-  }
+    setFrom("");
+    setTo("");
+    setFromPlace(null);
+    setToPlace(null);
+    setFromResults([]);
+    setToResults([]);
+    setShowRecentSearches(false);
+    currentLocationInitialized.current = false;
+    onClear?.();
+  };
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
-    setShowRecentSearches(false)
+    event.preventDefault();
+    setShowRecentSearches(false);
 
     if (!fromPlace || !toPlace) {
-      toast.error('Select both origin and destination from the suggestions')
-      return
+      toast.error("Select both origin and destination from the suggestions");
+      return;
     }
 
     if (
@@ -315,58 +318,64 @@ export default function JourneySearch({
       !Number.isFinite(Number(toPlace.lat)) ||
       !Number.isFinite(Number(toPlace.lng))
     ) {
-      toast.error('Please select valid locations')
-      return
+      toast.error("Please select valid locations");
+      return;
     }
 
     if (
       Number(fromPlace.lat) === Number(toPlace.lat) &&
       Number(fromPlace.lng) === Number(toPlace.lng)
     ) {
-      toast.error('Origin and destination must be different')
-      return
+      toast.error("Origin and destination must be different");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const travelDate = new Date().toISOString().split('T')[0]
       const response = await searchJourneyAPI({
         fromLat: Number(fromPlace.lat),
         fromLng: Number(fromPlace.lng),
         toLat: Number(toPlace.lat),
         toLng: Number(toPlace.lng),
         date: travelDate,
-      })
+      });
 
       const journeyData = {
         ...response.data.data,
         from: fromPlace,
         to: toPlace,
         travelDate,
-      }
+      };
 
-      saveRecentSearch(fromPlace, toPlace)
-      onSearch?.(journeyData)
+      saveRecentSearch(fromPlace, toPlace);
+      onSearch?.(journeyData);
     } catch (error) {
-      console.error('Journey search error:', error)
-      toast.error(error?.response?.data?.message || 'Could not find a route')
+      console.error("Journey search error:", error);
+      toast.error(
+        error?.response?.data?.message ||
+          (error?.request
+            ? "Could not reach the transit service. Check that the backend is running and allows requests from this app."
+            : "Could not find a route"),
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // ====================================================
   // RENDER NOMINATIM RESULTS
   // ====================================================
   const renderResults = (results, field) => {
-    if (!results || results.length === 0) return null
+    if (!results || results.length === 0) return null;
 
     return (
       <div className="absolute left-0 right-0 top-full z-[3000] mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
         {results.map((place, index) => (
           <button
-            key={place.place_id || `${field}-${place.lat}-${place.lon}-${index}`}
+            key={
+              place.place_id || `${field}-${place.lat}-${place.lon}-${index}`
+            }
             type="button"
             onClick={() => selectPlace(place, field)}
             className="flex w-full items-start gap-3 border-b border-gray-100 px-4 py-3 text-left text-gray-900 last:border-0 hover:bg-gray-50"
@@ -378,8 +387,8 @@ export default function JourneySearch({
           </button>
         ))}
       </div>
-    )
-  }
+    );
+  };
 
   // ====================================================
   // RECENT SEARCHES
@@ -388,12 +397,12 @@ export default function JourneySearch({
     const hasCurrentLocation =
       currentLocation &&
       Number.isFinite(Number(currentLocation.lat)) &&
-      Number.isFinite(Number(currentLocation.lng))
+      Number.isFinite(Number(currentLocation.lng));
 
     const showCurrentLocation =
-      (activeField === 'from' || activeField === 'to') && hasCurrentLocation
+      (activeField === "from" || activeField === "to") && hasCurrentLocation;
 
-    if (!showCurrentLocation && recentSearches.length === 0) return null
+    if (!showCurrentLocation && recentSearches.length === 0) return null;
 
     return (
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
@@ -421,7 +430,7 @@ export default function JourneySearch({
                   Current location
                 </p>
                 <p className="mt-0.5 truncate text-xs text-gray-500">
-                  {currentLocationPlace?.name || 'Your current location'}
+                  {currentLocationPlace?.name || "Your current location"}
                 </p>
               </div>
             </button>
@@ -453,41 +462,41 @@ export default function JourneySearch({
           ))}
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   const handleCurrentLocation = (field) => {
-    if (!currentLocation) return
+    if (!currentLocation) return;
 
-    const lat = Number(currentLocation.lat)
-    const lng = Number(currentLocation.lng)
+    const lat = Number(currentLocation.lat);
+    const lng = Number(currentLocation.lng);
 
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
     const selected = {
       ...(currentLocationPlace || {}),
-      name: currentLocationPlace?.name || 'Your current location',
+      name: currentLocationPlace?.name || "Your current location",
       lat,
       lng,
       isCurrentLocation: true,
-    }
+    };
 
-    setCurrentLocationPlace(selected)
+    setCurrentLocationPlace(selected);
 
-    if (field === 'to') {
-      setTo(selected.name)
-      setToPlace(selected)
-      setToResults([])
+    if (field === "to") {
+      setTo(selected.name);
+      setToPlace(selected);
+      setToResults([]);
     } else {
-      setFrom(selected.name)
-      setFromPlace(selected)
-      setFromResults([])
+      setFrom(selected.name);
+      setFromPlace(selected);
+      setFromResults([]);
     }
 
-    setActiveField(field)
-    currentLocationInitialized.current = true
-    setShowRecentSearches(false)
-  }
+    setActiveField(field);
+    currentLocationInitialized.current = true;
+    setShowRecentSearches(false);
+  };
 
   // ====================================================
   // RENDER
@@ -507,33 +516,31 @@ export default function JourneySearch({
               type="text"
               value={from}
               onChange={(event) => {
-                const value = event.target.value
-                setFrom(value)
-                setFromPlace(null)
-                currentLocationInitialized.current = true
-                setActiveField('from')
-                setShowRecentSearches(false)
-                searchLocation(value, 'from')
+                const value = event.target.value;
+                setFrom(value);
+                setFromPlace(null);
+                currentLocationInitialized.current = true;
+                setActiveField("from");
+                setShowRecentSearches(false);
+                searchLocation(value, "from");
               }}
               onFocus={() => {
-                setActiveField('from')
+                setActiveField("from");
                 const hasCurrentLocation =
                   currentLocation &&
                   Number.isFinite(Number(currentLocation.lat)) &&
-                  Number.isFinite(Number(currentLocation.lng))
+                  Number.isFinite(Number(currentLocation.lng));
 
                 if (hasCurrentLocation || recentSearches.length > 0) {
-                  setShowRecentSearches(true)
+                  setShowRecentSearches(true);
                 }
               }}
-              placeholder={
-             'From'
-              }
+              placeholder={"From"}
               autoComplete="off"
               className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-10 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-blue-500 focus:bg-white"
             />
-          
-            {fromResults.length > 0 && renderResults(fromResults, 'from')}
+
+            {fromResults.length > 0 && renderResults(fromResults, "from")}
           </div>
 
           {/* SWAP */}
@@ -561,41 +568,41 @@ export default function JourneySearch({
               type="text"
               value={to}
               onChange={(event) => {
-                const value = event.target.value
-                setTo(value)
-                setToPlace(null)
-                setActiveField('to')
-                setShowRecentSearches(false)
-                searchLocation(value, 'to')
+                const value = event.target.value;
+                setTo(value);
+                setToPlace(null);
+                setActiveField("to");
+                setShowRecentSearches(false);
+                searchLocation(value, "to");
               }}
               onFocus={() => {
-                setActiveField('to')
+                setActiveField("to");
                 const hasCurrentLocation =
                   currentLocation &&
                   Number.isFinite(Number(currentLocation.lat)) &&
-                  Number.isFinite(Number(currentLocation.lng))
+                  Number.isFinite(Number(currentLocation.lng));
 
                 if (hasCurrentLocation || recentSearches.length > 0) {
-                  setShowRecentSearches(true)
+                  setShowRecentSearches(true);
                 }
               }}
               placeholder="To"
               autoComplete="off"
               className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-10 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-blue-500 focus:bg-white"
             />
-            {searchingField === 'to' && (
+            {searchingField === "to" && (
               <Loader2
                 size={15}
                 className="absolute right-3 top-3.5 animate-spin text-gray-500"
               />
             )}
-            {toResults.length > 0 && renderResults(toResults, 'to')}
+            {toResults.length > 0 && renderResults(toResults, "to")}
           </div>
 
           {/* RECENT SEARCHES */}
           {showRecentSearches &&
             (recentSearches.length > 0 ||
-              ((activeField === 'from' || activeField === 'to') &&
+              ((activeField === "from" || activeField === "to") &&
                 currentLocation &&
                 Number.isFinite(Number(currentLocation.lat)) &&
                 Number.isFinite(Number(currentLocation.lng)))) && (
@@ -605,13 +612,33 @@ export default function JourneySearch({
             )}
         </div>
 
+        <label className="mt-3 block text-xs font-medium text-gray-600">
+          Travel date
+          <span className="ml-1 font-normal text-gray-400">
+            (future dates are advance reservations)
+          </span>
+        </label>
+        <div className="relative mt-1">
+          <CalendarDays
+            size={16}
+            className="pointer-events-none absolute left-3 top-3 text-gray-400"
+          />
+          <input
+            type="date"
+            value={travelDate}
+            min={getLocalDateInput()}
+            onChange={(event) => setTravelDate(event.target.value)}
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-3 text-sm text-gray-900 outline-none focus:border-blue-500 focus:bg-white"
+          />
+        </div>
+
         {/* SEARCH */}
         <button
           type="submit"
           disabled={loading}
           className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? 'Finding route...' : 'Search route'}
+          {loading ? "Finding route..." : "Search route"}
         </button>
 
         {/* CLEAR */}
@@ -626,5 +653,5 @@ export default function JourneySearch({
         )}
       </div>
     </form>
-  )
+  );
 }

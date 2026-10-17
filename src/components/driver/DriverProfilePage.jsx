@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Car,
@@ -10,294 +10,243 @@ import {
   Save,
   Send,
   XCircle,
-} from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 import {
   getDriverProfileAPI,
   updateDriverProfileAPI,
   getVehicleChangeRequestsAPI,
   requestVehicleChangeAPI,
-} from '../../api/driver.api'
+} from "../../api/driver.api";
 
 export default function DriverProfilePage() {
-  const router = useRouter()
+  const router = useRouter();
 
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [requesting, setRequesting] = useState(false)
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [requesting, setRequesting] = useState(false);
 
   const [form, setForm] = useState({
-    fname: '',
-    lname: '',
-    email: '',
-    phone: '',
-  })
+    fname: "",
+    lname: "",
+    email: "",
+    phone: "",
+  });
 
-  const [vehicle, setVehicle] = useState(null)
-  const [changeRequests, setChangeRequests] = useState([])
+  const [vehicle, setVehicle] = useState(null);
+  const [changeRequests, setChangeRequests] = useState([]);
 
-  const [showVehicleForm, setShowVehicleForm] = useState(false)
+  const [showVehicleForm, setShowVehicleForm] = useState(false);
 
   const [vehicleForm, setVehicleForm] = useState({
-    vehicleNumber: '',
-    vehicleType: 'car',
-    brand: '',
-    model: '',
-    color: '',
-  })
+    vehicleNumber: "",
+    vehicleType: "car",
+    brand: "",
+    model: "",
+    color: "",
+  });
 
   useEffect(() => {
-    loadProfile()
-    loadVehicleChangeRequests()
-  }, [])
+    loadProfile();
+    loadVehicleChangeRequests();
+  }, []);
 
   const loadProfile = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const response = await getDriverProfileAPI()
+      const response = await getDriverProfileAPI();
 
-      const data =
-        response?.data?.data ||
-        response?.data ||
-        response
+      const data = response?.data?.data || response?.data || response;
 
-      const user = data?.user || {}
-      const vehicles = data?.vehicles || []
+      const user = data?.user || {};
+      const vehicles = data?.vehicles || [];
 
       setForm({
-        fname: user.fname || '',
-        lname: user.lname || '',
-        email: user.email || '',
-        phone: user.phone || '',
-      })
+        fname: user.fname || "",
+        lname: user.lname || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
 
       const activeVehicle =
         vehicles.find(
-          (item) =>
-            item.isActive &&
-            item.approvalStatus === 'APPROVED'
+          (item) => item.isActive && item.approvalStatus === "APPROVED",
         ) ||
         vehicles.find((item) => item.isActive) ||
         vehicles[0] ||
-        null
+        null;
 
-      setVehicle(activeVehicle)
+      setVehicle(activeVehicle);
     } catch (error) {
-      console.error('Failed to load driver profile:', error)
+      console.error("Failed to load driver profile:", error);
 
-      toast.error(
-        error?.response?.data?.message ||
-          'Failed to load profile'
-      )
+      toast.error(error?.response?.data?.message || "Failed to load profile");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const loadVehicleChangeRequests = async () => {
     try {
-      const response = await getVehicleChangeRequestsAPI()
+      const response = await getVehicleChangeRequestsAPI();
 
-      const data =
-        response?.data?.data ||
-        response?.data ||
-        response
+      const data = response?.data?.data || response?.data || response;
 
-      setChangeRequests(
-        Array.isArray(data)
-          ? data
-          : data?.requests || []
-      )
+      setChangeRequests(Array.isArray(data) ? data : data?.requests || []);
     } catch (error) {
-      console.error(
-        'Failed to load vehicle change requests:',
-        error
-      )
+      console.error("Failed to load vehicle change requests:", error);
     }
-  }
+  };
 
   const handleChange = (event) => {
-    const { name, value } = event.target
+    const { name, value } = event.target;
 
     setForm((previous) => ({
       ...previous,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleVehicleChange = (event) => {
-    const { name, value } = event.target
+    const { name, value } = event.target;
 
     setVehicleForm((previous) => ({
       ...previous,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSave = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
     try {
-      setSaving(true)
+      setSaving(true);
 
       await updateDriverProfileAPI({
         fname: form.fname.trim(),
         lname: form.lname.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
-      })
+      });
 
-      toast.success('Profile updated successfully')
+      toast.success("Profile updated successfully");
 
-      await loadProfile()
+      await loadProfile();
     } catch (error) {
-      console.error(
-        'Failed to update driver profile:',
-        error
-      )
+      console.error("Failed to update driver profile:", error);
 
-      toast.error(
-        error?.response?.data?.message ||
-          'Failed to update profile'
-      )
+      toast.error(error?.response?.data?.message || "Failed to update profile");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const pendingRequest = useMemo(() => {
     return changeRequests.find(
-      (request) =>
-        String(request.status || '').toUpperCase() ===
-        'PENDING'
-    )
-  }, [changeRequests])
+      (request) => String(request.status || "").toUpperCase() === "PENDING",
+    );
+  }, [changeRequests]);
 
   const handleRequestVehicleChange = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
     if (pendingRequest) {
-      toast.error(
-        'You already have a pending vehicle change request.'
-      )
-      return
+      toast.error("You already have a pending vehicle change request.");
+      return;
     }
 
     if (!vehicleForm.vehicleNumber.trim()) {
-      toast.error('Vehicle number is required')
-      return
+      toast.error("Vehicle number is required");
+      return;
     }
 
     try {
-      setRequesting(true)
+      setRequesting(true);
 
       await requestVehicleChangeAPI({
-        vehicleNumber:
-          vehicleForm.vehicleNumber.trim().toUpperCase(),
+        vehicleNumber: vehicleForm.vehicleNumber.trim().toUpperCase(),
 
-        vehicleType:
-          vehicleForm.vehicleType,
+        vehicleType: vehicleForm.vehicleType,
 
-        brand:
-          vehicleForm.brand.trim() || undefined,
+        brand: vehicleForm.brand.trim() || undefined,
 
-        model:
-          vehicleForm.model.trim() || undefined,
+        model: vehicleForm.model.trim() || undefined,
 
-        color:
-          vehicleForm.color.trim() || undefined,
-      })
+        color: vehicleForm.color.trim() || undefined,
+      });
 
-      toast.success(
-        'Vehicle change request submitted for admin approval'
-      )
+      toast.success("Vehicle change request submitted for admin approval");
 
       setVehicleForm({
-        vehicleNumber: '',
-        vehicleType: 'car',
-        brand: '',
-        model: '',
-        color: '',
-      })
+        vehicleNumber: "",
+        vehicleType: "car",
+        brand: "",
+        model: "",
+        color: "",
+      });
 
-      setShowVehicleForm(false)
+      setShowVehicleForm(false);
 
-      await loadVehicleChangeRequests()
-      await loadProfile()
+      await loadVehicleChangeRequests();
+      await loadProfile();
     } catch (error) {
-      console.error(
-        'Failed to request vehicle change:',
-        error
-      )
+      console.error("Failed to request vehicle change:", error);
 
       toast.error(
         error?.response?.data?.message ||
-          'Failed to submit vehicle change request'
-      )
+          "Failed to submit vehicle change request",
+      );
     } finally {
-      setRequesting(false)
+      setRequesting(false);
     }
-  }
+  };
 
   const getStatusStyles = (status) => {
-    const normalized =
-      String(status || '').toUpperCase()
+    const normalized = String(status || "").toUpperCase();
 
-    if (normalized === 'APPROVED') {
+    if (normalized === "APPROVED") {
       return {
-        container:
-          'bg-emerald-50 border-emerald-200',
-        text:
-          'text-emerald-700',
-        icon:
-          <CheckCircle2 className="h-4 w-4" />,
-      }
+        container: "bg-emerald-50 border-emerald-200",
+        text: "text-emerald-700",
+        icon: <CheckCircle2 className="h-4 w-4" />,
+      };
     }
 
-    if (normalized === 'REJECTED') {
+    if (normalized === "REJECTED") {
       return {
-        container:
-          'bg-red-50 border-red-200',
-        text:
-          'text-red-700',
-        icon:
-          <XCircle className="h-4 w-4" />,
-      }
+        container: "bg-red-50 border-red-200",
+        text: "text-red-700",
+        icon: <XCircle className="h-4 w-4" />,
+      };
     }
 
     return {
-      container:
-        'bg-amber-50 border-amber-200',
-      text:
-        'text-amber-700',
-      icon:
-        <Clock3 className="h-4 w-4" />,
-    }
-  }
+      container: "bg-amber-50 border-amber-200",
+      text: "text-amber-700",
+      icon: <Clock3 className="h-4 w-4" />,
+    };
+  };
 
   const formatDate = (date) => {
     if (!date) {
-      return '—'
+      return "—";
     }
 
-    const parsed = new Date(date)
+    const parsed = new Date(date);
 
     if (Number.isNaN(parsed.getTime())) {
-      return '—'
+      return "—";
     }
 
-    return parsed.toLocaleDateString(
-      'en-IN',
-      {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      }
-    )
-  }
+    return parsed.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   if (loading) {
     return (
@@ -307,18 +256,17 @@ export default function DriverProfilePage() {
           Loading profile...
         </div>
       </main>
-    )
+    );
   }
 
   return (
     <main className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-
         {/* Header */}
         <div className="mb-6">
           <button
             type="button"
-            onClick={() => router.push('/driver')}
+            onClick={() => router.push("/driver")}
             className="mb-4 flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-900"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -335,7 +283,6 @@ export default function DriverProfilePage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-
           {/* Personal Details */}
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
@@ -348,12 +295,8 @@ export default function DriverProfilePage() {
               </p>
             </div>
 
-            <form
-              onSubmit={handleSave}
-              className="space-y-4"
-            >
+            <form onSubmit={handleSave} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">
                     First name
@@ -383,7 +326,6 @@ export default function DriverProfilePage() {
                     className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-100"
                   />
                 </div>
-
               </div>
 
               <div>
@@ -456,78 +398,63 @@ export default function DriverProfilePage() {
 
             {vehicle ? (
               <div className="space-y-4">
-
                 <div className="rounded-xl border border-slate-200 p-4">
                   <div className="grid gap-4 sm:grid-cols-2">
-
                     <div>
-                      <p className="text-xs text-slate-500">
-                        Vehicle number
-                      </p>
+                      <p className="text-xs text-slate-500">Vehicle number</p>
 
                       <p className="mt-1 font-medium text-slate-900">
-                        {vehicle.vehicleNumber || '—'}
+                        {vehicle.vehicleNumber || "—"}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs text-slate-500">
-                        Vehicle type
-                      </p>
+                      <p className="text-xs text-slate-500">Vehicle type</p>
 
                       <p className="mt-1 font-medium capitalize text-slate-900">
-                        {vehicle.vehicleType || '—'}
+                        {vehicle.vehicleType || "—"}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs text-slate-500">
-                        Brand
-                      </p>
+                      <p className="text-xs text-slate-500">Brand</p>
 
                       <p className="mt-1 font-medium text-slate-900">
-                        {vehicle.brand || '—'}
+                        {vehicle.brand || "—"}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs text-slate-500">
-                        Model
-                      </p>
+                      <p className="text-xs text-slate-500">Model</p>
 
                       <p className="mt-1 font-medium text-slate-900">
-                        {vehicle.model || '—'}
+                        {vehicle.model || "—"}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs text-slate-500">
-                        Color
-                      </p>
+                      <p className="text-xs text-slate-500">Color</p>
 
                       <p className="mt-1 font-medium text-slate-900">
-                        {vehicle.color || '—'}
+                        {vehicle.color || "—"}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs text-slate-500">
-                        Approval status
-                      </p>
+                      <p className="text-xs text-slate-500">Approval status</p>
 
                       <span
                         className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                          vehicle.approvalStatus === 'APPROVED'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : vehicle.approvalStatus === 'REJECTED'
-                              ? 'bg-red-50 text-red-700'
-                              : 'bg-amber-50 text-amber-700'
+                          vehicle.approvalStatus === "APPROVED"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : vehicle.approvalStatus === "REJECTED"
+                              ? "bg-red-50 text-red-700"
+                              : "bg-amber-50 text-amber-700"
                         }`}
                       >
-                        {vehicle.approvalStatus || 'APPROVED'}
+                        {vehicle.approvalStatus || "APPROVED"}
                       </span>
                     </div>
-
                   </div>
                 </div>
 
@@ -535,16 +462,12 @@ export default function DriverProfilePage() {
                 {!pendingRequest && (
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowVehicleForm(
-                        (previous) => !previous
-                      )
-                    }
+                    onClick={() => setShowVehicleForm((previous) => !previous)}
                     className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 transition hover:bg-slate-50"
                   >
                     {showVehicleForm
-                      ? 'Cancel vehicle change'
-                      : 'Request vehicle change'}
+                      ? "Cancel vehicle change"
+                      : "Request vehicle change"}
                   </button>
                 )}
 
@@ -565,7 +488,6 @@ export default function DriverProfilePage() {
                     </div>
                   </div>
                 )}
-
               </div>
             ) : (
               <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center">
@@ -586,24 +508,19 @@ export default function DriverProfilePage() {
         {/* Vehicle Change Form */}
         {showVehicleForm && !pendingRequest && (
           <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
             <div className="mb-5">
               <h2 className="text-lg font-semibold text-slate-900">
                 Request vehicle change
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Submit your new vehicle details. The vehicle will only
-                become active after admin approval.
+                Submit your new vehicle details. The vehicle will only become
+                active after admin approval.
               </p>
             </div>
 
-            <form
-              onSubmit={handleRequestVehicleChange}
-              className="space-y-5"
-            >
+            <form onSubmit={handleRequestVehicleChange} className="space-y-5">
               <div className="grid gap-4 md:grid-cols-2">
-
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">
                     Vehicle number
@@ -631,17 +548,11 @@ export default function DriverProfilePage() {
                     onChange={handleVehicleChange}
                     className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-100"
                   >
-                    <option value="car">
-                      Car
-                    </option>
+                    <option value="car">Car</option>
 
-                    <option value="twoWheeler">
-                      Two Wheeler
-                    </option>
+                    <option value="twoWheeler">Two Wheeler</option>
 
-                    <option value="auto">
-                      Auto
-                    </option>
+                    <option value="auto">Auto</option>
                   </select>
                 </div>
 
@@ -689,16 +600,12 @@ export default function DriverProfilePage() {
                     className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-100"
                   />
                 </div>
-
               </div>
 
               <div className="flex justify-end gap-3">
-
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowVehicleForm(false)
-                  }
+                  onClick={() => setShowVehicleForm(false)}
                   className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
                 >
                   Cancel
@@ -721,7 +628,6 @@ export default function DriverProfilePage() {
                     </>
                   )}
                 </button>
-
               </div>
             </form>
           </section>
@@ -729,7 +635,6 @@ export default function DriverProfilePage() {
 
         {/* Request History */}
         <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-slate-900">
               Vehicle change history
@@ -754,15 +659,12 @@ export default function DriverProfilePage() {
             </div>
           ) : (
             <div className="space-y-3">
-
               {changeRequests.map((request) => {
-                const status =
-                  String(
-                    request.status || 'PENDING'
-                  ).toUpperCase()
+                const status = String(
+                  request.status || "PENDING",
+                ).toUpperCase();
 
-                const statusStyle =
-                  getStatusStyles(status)
+                const statusStyle = getStatusStyles(status);
 
                 return (
                   <div
@@ -770,12 +672,10 @@ export default function DriverProfilePage() {
                     className={`rounded-xl border p-4 ${statusStyle.container}`}
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-
                           <p className="font-semibold text-slate-900">
-                            {request.vehicleNumber || '—'}
+                            {request.vehicleNumber || "—"}
                           </p>
 
                           <span
@@ -784,62 +684,45 @@ export default function DriverProfilePage() {
                             {statusStyle.icon}
                             {status}
                           </span>
-
                         </div>
 
                         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
                           <span className="capitalize">
-                            {request.vehicleType || '—'}
+                            {request.vehicleType || "—"}
                           </span>
 
                           {request.brand && (
                             <span>
                               {request.brand}
-                              {request.model
-                                ? ` ${request.model}`
-                                : ''}
+                              {request.model ? ` ${request.model}` : ""}
                             </span>
                           )}
 
-                          {request.color && (
-                            <span>
-                              {request.color}
-                            </span>
-                          )}
+                          {request.color && <span>{request.color}</span>}
                         </div>
                       </div>
 
                       <div className="shrink-0 text-left sm:text-right">
-                        <p className="text-xs text-slate-500">
-                          Requested
-                        </p>
+                        <p className="text-xs text-slate-500">Requested</p>
 
                         <p className="mt-1 text-sm font-medium text-slate-700">
-                          {formatDate(
-                            request.requestedAt
-                          )}
+                          {formatDate(request.requestedAt)}
                         </p>
 
                         {request.reviewedAt && (
                           <p className="mt-1 text-xs text-slate-500">
-                            Reviewed{' '}
-                            {formatDate(
-                              request.reviewedAt
-                            )}
+                            Reviewed {formatDate(request.reviewedAt)}
                           </p>
                         )}
                       </div>
-
                     </div>
                   </div>
-                )
+                );
               })}
-
             </div>
           )}
         </section>
-
       </div>
     </main>
-  )
+  );
 }

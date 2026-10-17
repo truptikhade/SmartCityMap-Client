@@ -1,5 +1,5 @@
-import MyBookingsPage from '../../components/booking/MyBookingsPage'
+import MyBookingsPage from "../../components/booking/MyBookingsPage";
 
 export default function Page() {
-  return <MyBookingsPage />
+  return <MyBookingsPage />;
 }

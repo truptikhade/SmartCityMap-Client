@@ -1,21 +1,19 @@
-'use client'
-import { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { logout, loadFromStorage } from '../store/authSlice'
+"use client";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { logout, loadFromStorage } from "../store/authSlice";
 
 export const useAuth = () => {
-  const dispatch = useDispatch()
-  const auth = useSelector((state) => state.auth)
+  const dispatch = useDispatch();
+  const auth = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (!auth.isAuthenticated) {
-      dispatch(loadFromStorage())
-    }
-  }, [dispatch, auth.isAuthenticated])
+    dispatch(loadFromStorage());
+  }, [dispatch]);
 
   const llogout = () => {
-    dispatch(logout())
-  }
+    dispatch(logout());
+  };
 
   return {
     user: auth.user,
@@ -23,5 +21,5 @@ export const useAuth = () => {
     isAuthenticated: auth.isAuthenticated,
     loading: auth.loading,
     logout: llogout,
-  }
-}
+  };
+};

@@ -1,216 +1,225 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useDispatch } from 'react-redux'
-import toast from 'react-hot-toast'
-import Image from 'next/image';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useDispatch } from "react-redux";
+import toast from "react-hot-toast";
+import Image from "next/image";
 
-import {
-  MapPin,
-  Mail,
-  Lock,
-  Loader2,
-  Car,
-  Eye,
-  EyeOff,
-} from 'lucide-react'
+import { MapPin, Mail, Lock, Loader2, Car, Eye, EyeOff } from "lucide-react";
 
-import { loginAPI } from '../../api/auth.api'
-import { setCredentials } from '../../store/authSlice'
+import { loginAPI } from "../../api/auth.api";
+import { setCredentials } from "../../store/authSlice";
 
 export default function Login() {
-  const router = useRouter()
-  const dispatch = useDispatch()
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  useEffect(
+    () => () => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+    },
+    [],
+  );
 
   const [form, setForm] = useState({
-    email: '',
-    password: '',
-  })
+    email: "",
+    password: "",
+  });
 
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
-    const { name, value } = event.target
+    const { name, value } = event.target;
 
     setForm((previous) => ({
       ...previous,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
     if (!form.email.trim() || !form.password) {
-      toast.error('Please fill in all fields')
-      return
+      toast.error("Please fill in all fields");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
       const res = await loginAPI({
         email: form.email.trim(),
         password: form.password,
-      })
+      });
 
-      const user = res.data.data.user
-      const token = res.data.data.token
+      const user = res.data.data.user;
+      const token = res.data.data.token;
 
       dispatch(
         setCredentials({
           user,
           token,
-        })
-      )
+        }),
+      );
 
-      toast.success('Welcome back!')
+      toast.success("Welcome back!");
 
-      if (user.role === 'driver') {
-        router.replace('/driver')
-        return
+      if (user.role === "driver") {
+        router.replace("/driver");
+        return;
       }
 
-      if (user.role === 'admin') {
-        router.replace('/admin')
-        return
+      if (user.role === "admin") {
+        router.replace("/admin");
+        return;
       }
 
-      router.replace('/')
+      router.replace("/");
     } catch (err) {
-      toast.error(
-        err?.response?.data?.message ||
-          'Login failed'
-      )
+      toast.error(err?.response?.data?.message || "Login failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    
     <div className="flex min-h-screen items-center justify-center bg-stone-100 px-5 py-8">
       <div className="flex w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl">
-    
-      {/* Left Side: Image (Hidden on mobile, visible on medium screens and up) */}
-      <div className="hidden md:block md:w-1/2">
-        <img src="/login.jpg"  alt="Login visual" className="h-full w-full object-cover"/>
-      </div>
-      <div className="w-full px-12 py-12 md:w-[55%] flex flex-col justify-center">
-
-        {/* LOGO */}
-        <div className="mb-8 flex flex-col items-center">
-          <div className="mb-3 rounded-2xl bg-mauve-600 p-3 shadow-sm">
-            <MapPin className="text-white" size={28}/>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-950">SmartCity</h1>
-          <p className="mt-1 text-sm text-gray-500">Sign in to continue</p>
+        {/* Left Side: Image (Hidden on mobile, visible on medium screens and up) */}
+        <div className="hidden md:block md:w-1/2">
+          <img
+            src="/login.jpg"
+            alt="Login visual"
+            className="h-full w-full object-cover"
+          />
         </div>
-
-        {/* LOGIN CARD */}
-        <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl bg-white p-6 ">
-          {/* EMAIL */}
-          <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <div className="relative">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16}/>
-              <input id="email" type="email" name="email" value={form.email} onChange={handleChange} placeholder="you@email.com" autoComplete="email"
-                disabled={loading} className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm
-                 text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-100 
-                 focus:ring-2 focus:ring-gray-50 disabled:cursor-not-allowed disabled:bg-gray-50" />
+        <div className="w-full px-12 py-12 md:w-[55%] flex flex-col justify-center">
+          {/* LOGO */}
+          <div className="mb-8 flex flex-col items-center">
+            <div className="mb-3 rounded-2xl bg-mauve-600 p-3 shadow-sm">
+              <MapPin className="text-white" size={28} />
             </div>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-950">
+              SmartCity
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">Sign in to continue</p>
           </div>
 
-          {/* PASSWORD */}
-          <div>
-            <div className="mb-1.5 flex items-center justify-between">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-              <Link href="/forgot-password" className="text-xs font-medium text-mauve-700 transition hover:text-mauve-700">Forgot password?</Link>
+          {/* LOGIN CARD */}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5 rounded-2xl bg-white p-6 "
+          >
+            {/* EMAIL */}
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-1.5 block text-sm font-medium text-gray-700"
+              >
+                Email
+              </label>
+              <div className="relative">
+                <Mail
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={16}
+                />
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="you@email.com"
+                  autoComplete="email"
+                  disabled={loading}
+                  className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm
+                 text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-100
+                 focus:ring-2 focus:ring-gray-50 disabled:cursor-not-allowed disabled:bg-gray-50"
+                />
+              </div>
             </div>
-            <div className="relative">
-              <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16}/>
-              <input id="password" type={ showPassword ? 'text' : 'password'} name="password" value={form.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                disabled={loading}
-                className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-11 text-sm
+
+            {/* PASSWORD */}
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-medium text-mauve-700 transition hover:text-mauve-700"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
+                <Lock
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={16}
+                />
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  disabled={loading}
+                  className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-11 text-sm
                  text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-100 
                  focus:ring-2 focus:ring-gray-50 disabled:cursor-not-allowed disabled:bg-gray-50"
-              />
-              <button
-                type="button"
-                onClick={() =>
-                  setShowPassword(
-                    (previous) => !previous
-                  )
-                }
-                disabled={loading}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label={
-                  showPassword
-                    ? 'Hide password'
-                    : 'Show password'
-                }
-                aria-pressed={showPassword}
-              >
-                {showPassword ? (
-                  <EyeOff size={17} />
-                ) : (
-                  <Eye size={17} />
-                )}
-              </button>
-
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((previous) => !previous)}
+                  disabled={loading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
             </div>
 
-          </div>
+            {/* SIGN IN */}
 
-          {/* SIGN IN */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl  bg-mauve-700  py-2.5 text-sm font-medium text-white transition hover:bg-mauve-600 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading && <Loader2 className="animate-spin" size={16} />}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl  bg-mauve-700  py-2.5 text-sm font-medium text-white transition hover:bg-mauve-600 disabled:cursor-not-allowed disabled:opacity-60"
-          >
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+          </form>
 
-            {loading && (
-              <Loader2
-                className="animate-spin"
-                size={16}
-              />
-            )}
+          {/* REGISTER */}
 
-            {loading
-              ? 'Signing in...'
-              : 'Sign In'}
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Don't have an account?{" "}
+            <Link
+              href="/register"
+              className="font-medium text-mauve-700 transition hover:text-mauve-700"
+            >
+              Sign up
+            </Link>
+          </p>
 
-          </button>
+          {/* DRIVER REGISTRATION */}
 
-        </form>
-
-        {/* REGISTER */}
-
-        <p className="mt-6 text-center text-sm text-gray-500">
-
-          Don't have an account?{' '}
-
-          <Link
-            href="/register"
-            className="font-medium text-mauve-700 transition hover:text-mauve-700"
-          >
-            Sign up
-          </Link>
-
-        </p>
-
-        {/* DRIVER REGISTRATION */}
-
-        {/* <div className="mt-5 border-t border-gray-200 pt-5 text-center">
+          {/* <div className="mt-5 border-t border-gray-200 pt-5 text-center">
 
           <p className="mb-2 text-xs text-gray-500">
             Want to drive with SmartCity?
@@ -225,9 +234,8 @@ export default function Login() {
           </Link>
 
         </div> */}
-
+        </div>
       </div>
     </div>
-    </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 import {
   CheckCircle2,
   Clock3,
@@ -11,8 +11,8 @@ import {
   Play,
   ShieldCheck,
   User,
-} from 'lucide-react'
-import toast from 'react-hot-toast'
+} from "lucide-react";
+import toast from "react-hot-toast";
 
 import {
   driverArrivingAPI,
@@ -21,452 +21,343 @@ import {
   startRideAPI,
   completeRideAPI,
   cancelRideAPI,
-} from '../../api/driver.api'
+} from "../../api/driver.api";
 
-import DriverOtpModal from './DriverOtpModal'
+import DriverOtpModal from "./DriverOtpModal";
 
-export default function ActiveRideCard({
-  ride,
-  onRideUpdated,
-}) {
-  const [isLoading, setIsLoading] =
-    useState(false)
+export default function ActiveRideCard({ ride, onRideUpdated }) {
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [otpModalOpen, setOtpModalOpen] =
-    useState(false)
+  const [otpModalOpen, setOtpModalOpen] = useState(false);
 
-  const [otp, setOtp] =
-    useState('')
+  const [otp, setOtp] = useState("");
 
-  const [finalFare, setFinalFare] =
-    useState('')
+  const [finalFare, setFinalFare] = useState("");
 
-  const [currentRide, setCurrentRide] =
-    useState(ride)
+  const [currentRide, setCurrentRide] = useState(ride);
 
-  // --------------------------------------------------
+  //
   // Sync ride with parent / Socket.IO updates
-  // --------------------------------------------------
+  //
 
   useEffect(() => {
-    setCurrentRide(ride)
-  }, [ride])
+    setCurrentRide(ride);
+  }, [ride]);
 
   if (!currentRide) {
-    return null
+    return null;
   }
 
-  // --------------------------------------------------
+  //
   // Helpers
-  // --------------------------------------------------
+  //
 
   const getResponseData = (response) => {
-    return response?.data || response
-  }
+    return response?.data || response;
+  };
 
   const updateRide = (updatedRide) => {
     if (!updatedRide) {
-      return
+      return;
     }
 
-    setCurrentRide(updatedRide)
+    setCurrentRide(updatedRide);
 
     if (onRideUpdated) {
-      onRideUpdated(updatedRide)
+      onRideUpdated(updatedRide);
     }
-  }
+  };
 
   const getPassengerName = () => {
     if (!currentRide.passenger) {
-      return 'Passenger'
+      return "Passenger";
     }
 
     return (
-      `${currentRide.passenger.fname || ''} ${
-        currentRide.passenger.lname || ''
-      }`.trim() || 'Passenger'
-    )
-  }
+      `${currentRide.passenger.fname || ""} ${
+        currentRide.passenger.lname || ""
+      }`.trim() || "Passenger"
+    );
+  };
 
-  // --------------------------------------------------
+  //
   // Driver arriving
-  // --------------------------------------------------
+  //
 
   const handleDriverArriving = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
-      const response =
-        await driverArrivingAPI(
-          currentRide.id
-        )
+      const response = await driverArrivingAPI(currentRide.id);
 
-      const updatedRide =
-        getResponseData(response)
+      const updatedRide = getResponseData(response);
 
-      updateRide(updatedRide)
+      updateRide(updatedRide);
 
-      toast.success(
-        'Passenger notified that you are on the way'
-      )
+      toast.success("Passenger notified that you are on the way");
     } catch (error) {
-      console.error(
-        'Driver arriving error:',
-        error
-      )
+      console.error("Driver arriving error:", error);
 
       toast.error(
-        error?.response?.data?.message ||
-          'Failed to update ride status'
-      )
+        error?.response?.data?.message || "Failed to update ride status",
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  // --------------------------------------------------
+  //
   // Driver arrived
-  // --------------------------------------------------
+  //
 
   const handleDriverArrived = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
-      const response =
-        await driverArrivedAPI(
-          currentRide.id
-        )
+      const response = await driverArrivedAPI(currentRide.id);
 
-      const updatedRide =
-        getResponseData(response)
+      const updatedRide = getResponseData(response);
 
-      updateRide(updatedRide)
+      updateRide(updatedRide);
 
-      toast.success(
-        'Passenger has been notified that you arrived'
-      )
+      toast.success("Passenger has been notified that you arrived");
     } catch (error) {
-      console.error(
-        'Driver arrived error:',
-        error
-      )
+      console.error("Driver arrived error:", error);
 
       toast.error(
-        error?.response?.data?.message ||
-          'Failed to update arrival status'
-      )
+        error?.response?.data?.message || "Failed to update arrival status",
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  // --------------------------------------------------
+  //
   // Open OTP modal
-  // --------------------------------------------------
+  //
 
   const handleOpenOtpModal = () => {
-    setOtp('')
-    setOtpModalOpen(true)
-  }
+    setOtp("");
+    setOtpModalOpen(true);
+  };
 
-  // --------------------------------------------------
+  //
   // Close OTP modal
-  // --------------------------------------------------
+  //
 
   const handleCloseOtpModal = () => {
     if (isLoading) {
-      return
+      return;
     }
 
-    setOtp('')
-    setOtpModalOpen(false)
-  }
+    setOtp("");
+    setOtpModalOpen(false);
+  };
 
-  // --------------------------------------------------
+  //
   // Verify OTP
-  // --------------------------------------------------
+  //
 
   const handleVerifyOtp = async (value) => {
-    const cleanOtp = String(value || '').trim()
+    const cleanOtp = String(value || "").trim();
 
     if (!/^\d{4,6}$/.test(cleanOtp)) {
-      toast.error(
-        'Enter the 4 to 6 digit passenger OTP'
-      )
+      toast.error("Enter the 4 to 6 digit passenger OTP");
 
-      return
+      return;
     }
 
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
-      const response =
-        await verifyRideOtpAPI(
-          currentRide.id,
-          cleanOtp
-        )
+      const response = await verifyRideOtpAPI(currentRide.id, cleanOtp);
 
-      const updatedRide =
-        getResponseData(response)
+      const updatedRide = getResponseData(response);
 
-      updateRide(updatedRide)
+      updateRide(updatedRide);
 
-      setOtp('')
-      setOtpModalOpen(false)
+      setOtp("");
+      setOtpModalOpen(false);
 
-      toast.success(
-        'OTP verified successfully'
-      )
+      toast.success("OTP verified successfully");
     } catch (error) {
-      console.error(
-        'OTP verification error:',
-        error
-      )
+      console.error("OTP verification error:", error);
 
-      toast.error(
-        error?.response?.data?.message ||
-          'Invalid OTP'
-      )
+      toast.error(error?.response?.data?.message || "Invalid OTP");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  // --------------------------------------------------
+  //
   // Start ride
-  // --------------------------------------------------
+  //
 
   const handleStartRide = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
-      const response =
-        await startRideAPI(
-          currentRide.id
-        )
+      const response = await startRideAPI(currentRide.id);
 
-      const updatedRide =
-        getResponseData(response)
+      const updatedRide = getResponseData(response);
 
-      updateRide(updatedRide)
+      updateRide(updatedRide);
 
-      toast.success(
-        'Ride started'
-      )
+      toast.success("Ride started");
     } catch (error) {
-      console.error(
-        'Start ride error:',
-        error
-      )
+      console.error("Start ride error:", error);
 
-      toast.error(
-        error?.response?.data?.message ||
-          'Failed to start ride'
-      )
+      toast.error(error?.response?.data?.message || "Failed to start ride");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  // --------------------------------------------------
+  //
   // Complete ride
-  // --------------------------------------------------
+  //
 
   const handleCompleteRide = async () => {
-    const parsedFare =
-      Number(finalFare)
+    const parsedFare = Number(finalFare);
 
-    if (
-      finalFare === '' ||
-      Number.isNaN(parsedFare) ||
-      parsedFare < 0
-    ) {
-      toast.error(
-        'Enter a valid final fare'
-      )
+    if (finalFare === "" || Number.isNaN(parsedFare) || parsedFare < 0) {
+      toast.error("Enter a valid final fare");
 
-      return
+      return;
     }
 
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
-      const response =
-        await completeRideAPI(
-          currentRide.id,
-          parsedFare
-        )
+      const response = await completeRideAPI(currentRide.id, parsedFare);
 
-      const updatedRide =
-        getResponseData(response)
+      const updatedRide = getResponseData(response);
 
-      updateRide(updatedRide)
+      updateRide(updatedRide);
 
-      setFinalFare('')
+      setFinalFare("");
 
-      toast.success(
-        'Ride completed successfully'
-      )
+      toast.success("Ride completed successfully");
     } catch (error) {
-      console.error(
-        'Complete ride error:',
-        error
-      )
+      console.error("Complete ride error:", error);
 
-      toast.error(
-        error?.response?.data?.message ||
-          'Failed to complete ride'
-      )
+      toast.error(error?.response?.data?.message || "Failed to complete ride");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  // --------------------------------------------------
+  //
   // Cancel ride
-  // --------------------------------------------------
+  //
 
   const handleCancelRide = async () => {
-    const confirmed =
-      window.confirm(
-        'Are you sure you want to cancel this ride?'
-      )
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this ride?",
+    );
 
     if (!confirmed) {
-      return
+      return;
     }
 
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
-      const response =
-        await cancelRideAPI(
-          currentRide.id
-        )
+      const response = await cancelRideAPI(currentRide.id);
 
-      const updatedRide =
-        getResponseData(response)
+      const updatedRide = getResponseData(response);
 
-      updateRide(updatedRide)
+      updateRide(updatedRide);
 
-      toast.success(
-        'Ride cancelled'
-      )
+      toast.success("Ride cancelled");
     } catch (error) {
-      console.error(
-        'Cancel ride error:',
-        error
-      )
+      console.error("Cancel ride error:", error);
 
-      toast.error(
-        error?.response?.data?.message ||
-          'Failed to cancel ride'
-      )
+      toast.error(error?.response?.data?.message || "Failed to cancel ride");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  // --------------------------------------------------
+  //
   // Display values
-  // --------------------------------------------------
+  //
 
-  const passengerName =
-    getPassengerName()
+  const passengerName = getPassengerName();
 
   const distance =
     currentRide.distanceKm != null
-      ? `${Number(
-          currentRide.distanceKm
-        ).toFixed(1)} km`
-      : '--'
+      ? `${Number(currentRide.distanceKm).toFixed(1)} km`
+      : "--";
 
   const duration =
     currentRide.durationMinutes != null
-      ? `${Math.round(
-          Number(
-            currentRide.durationMinutes
-          )
-        )} min`
-      : '--'
+      ? `${Math.round(Number(currentRide.durationMinutes))} min`
+      : "--";
 
   const estimatedFare =
     currentRide.estimatedFare != null
-      ? `₹${Number(
-          currentRide.estimatedFare
-        ).toFixed(0)}`
-      : '--'
+      ? `₹${Number(currentRide.estimatedFare).toFixed(0)}`
+      : "--";
 
-  const status =
-    currentRide.status
+  const status = currentRide.status;
 
-  const canCancel = [
-    'ACCEPTED',
-    'DRIVER_ARRIVING',
-    'DRIVER_ARRIVED',
-  ].includes(status)
+  const canCancel = ["ACCEPTED", "DRIVER_ARRIVING", "DRIVER_ARRIVED"].includes(
+    status,
+  );
 
-  // --------------------------------------------------
+  //
   // Status configuration
-  // --------------------------------------------------
+  //
 
   const statusConfig = {
     ACCEPTED: {
-      label: 'Ride Accepted',
-      description:
-        'Start driving toward the passenger.',
+      label: "Ride Accepted",
+      description: "Start driving toward the passenger.",
     },
 
     DRIVER_ARRIVING: {
-      label: 'On the Way',
-      description:
-        'You are on the way to the passenger.',
+      label: "On the Way",
+      description: "You are on the way to the passenger.",
     },
 
     DRIVER_ARRIVED: {
-      label: 'Arrived',
-      description:
-        'Ask the passenger for their OTP.',
+      label: "Arrived",
+      description: "Ask the passenger for their OTP.",
     },
 
     OTP_VERIFIED: {
-      label: 'OTP Verified',
-      description:
-        'The passenger has been verified.',
+      label: "OTP Verified",
+      description: "The passenger has been verified.",
     },
 
     IN_PROGRESS: {
-      label: 'Ride In Progress',
-      description:
-        'Take the passenger to the destination.',
+      label: "Ride In Progress",
+      description: "Take the passenger to the destination.",
     },
 
     COMPLETED: {
-      label: 'Completed',
-      description:
-        'This ride has been completed.',
+      label: "Completed",
+      description: "This ride has been completed.",
     },
 
     CANCELLED: {
-      label: 'Cancelled',
-      description:
-        'This ride has been cancelled.',
+      label: "Cancelled",
+      description: "This ride has been cancelled.",
     },
-  }
+  };
 
-  const statusInfo =
-    statusConfig[status] || {
-      label: status,
-      description:
-        'Ride status updated.',
-    }
+  const statusInfo = statusConfig[status] || {
+    label: status,
+    description: "Ride status updated.",
+  };
 
-  // --------------------------------------------------
+  //
   // Action section
-  // --------------------------------------------------
+  //
 
   const renderAction = () => {
-    if (status === 'ACCEPTED') {
+    if (status === "ACCEPTED") {
       return (
         <button
           type="button"
@@ -476,17 +367,12 @@ export default function ActiveRideCard({
         >
           <Navigation className="h-4 w-4" />
 
-          {isLoading
-            ? 'Updating...'
-            : 'Start Driving to Passenger'}
+          {isLoading ? "Updating..." : "Start Driving to Passenger"}
         </button>
-      )
+      );
     }
 
-    if (
-      status ===
-      'DRIVER_ARRIVING'
-    ) {
+    if (status === "DRIVER_ARRIVING") {
       return (
         <button
           type="button"
@@ -496,17 +382,12 @@ export default function ActiveRideCard({
         >
           <MapPin className="h-4 w-4" />
 
-          {isLoading
-            ? 'Updating...'
-            : "I've Arrived"}
+          {isLoading ? "Updating..." : "I've Arrived"}
         </button>
-      )
+      );
     }
 
-    if (
-      status ===
-      'DRIVER_ARRIVED'
-    ) {
+    if (status === "DRIVER_ARRIVED") {
       return (
         <div className="space-y-3">
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
@@ -519,8 +400,7 @@ export default function ActiveRideCard({
                 </p>
 
                 <p className="mt-1 text-xs text-gray-500">
-                  Ask the passenger for the OTP
-                  shown in their application.
+                  Ask the passenger for the OTP shown in their application.
                 </p>
               </div>
             </div>
@@ -533,17 +413,13 @@ export default function ActiveRideCard({
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ShieldCheck className="h-4 w-4" />
-
             Enter Passenger OTP
           </button>
         </div>
-      )
+      );
     }
 
-    if (
-      status ===
-      'OTP_VERIFIED'
-    ) {
+    if (status === "OTP_VERIFIED") {
       return (
         <button
           type="button"
@@ -553,17 +429,12 @@ export default function ActiveRideCard({
         >
           <Play className="h-4 w-4" />
 
-          {isLoading
-            ? 'Starting...'
-            : 'Start Ride'}
+          {isLoading ? "Starting..." : "Start Ride"}
         </button>
-      )
+      );
     }
 
-    if (
-      status ===
-      'IN_PROGRESS'
-    ) {
+    if (status === "IN_PROGRESS") {
       return (
         <div className="space-y-3">
           <div>
@@ -583,19 +454,11 @@ export default function ActiveRideCard({
                 min="0"
                 step="1"
                 value={finalFare}
-                onChange={(event) =>
-                  setFinalFare(
-                    event.target.value
-                  )
-                }
+                onChange={(event) => setFinalFare(event.target.value)}
                 placeholder={
                   currentRide.estimatedFare
-                    ? String(
-                        Number(
-                          currentRide.estimatedFare
-                        ).toFixed(0)
-                      )
-                    : 'Enter final fare'
+                    ? String(Number(currentRide.estimatedFare).toFixed(0))
+                    : "Enter final fare"
                 }
                 className="w-full rounded-lg border border-gray-300 py-3 pl-9 pr-4 text-sm outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
               />
@@ -605,57 +468,44 @@ export default function ActiveRideCard({
           <button
             type="button"
             onClick={handleCompleteRide}
-            disabled={
-              isLoading ||
-              finalFare === ''
-            }
+            disabled={isLoading || finalFare === ""}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <CheckCircle2 className="h-4 w-4" />
 
-            {isLoading
-              ? 'Completing...'
-              : 'Complete Ride'}
+            {isLoading ? "Completing..." : "Complete Ride"}
           </button>
         </div>
-      )
+      );
     }
 
-    if (
-      status ===
-      'COMPLETED'
-    ) {
+    if (status === "COMPLETED") {
       return (
         <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-700">
           <CheckCircle2 className="h-4 w-4" />
-
           Ride Completed
         </div>
-      )
+      );
     }
 
-    if (
-      status ===
-      'CANCELLED'
-    ) {
+    if (status === "CANCELLED") {
       return (
         <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-600">
           Ride Cancelled
         </div>
-      )
+      );
     }
 
-    return null
-  }
+    return null;
+  };
 
-  // --------------------------------------------------
+  //
   // UI
-  // --------------------------------------------------
+  //
 
   return (
     <>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-
         {/* Status */}
 
         <div className="border-b border-gray-100 p-5">
@@ -690,28 +540,20 @@ export default function ActiveRideCard({
               </div>
 
               <div>
-                <p className="font-semibold text-gray-900">
-                  {passengerName}
-                </p>
+                <p className="font-semibold text-gray-900">{passengerName}</p>
 
-                {currentRide.passenger
-                  ?.phone && (
+                {currentRide.passenger?.phone && (
                   <p className="mt-0.5 flex items-center gap-1 text-sm text-gray-500">
                     <Phone className="h-3.5 w-3.5" />
 
-                    {
-                      currentRide.passenger
-                        .phone
-                    }
+                    {currentRide.passenger.phone}
                   </p>
                 )}
               </div>
             </div>
 
             <div className="text-right">
-              <p className="text-xs text-gray-500">
-                Estimated fare
-              </p>
+              <p className="text-xs text-gray-500">Estimated fare</p>
 
               <p className="mt-1 text-lg font-semibold text-gray-900">
                 {estimatedFare}
@@ -724,7 +566,6 @@ export default function ActiveRideCard({
 
         <div className="p-5">
           <div className="relative space-y-6">
-
             <div className="absolute left-[7px] top-3 h-[calc(100%-28px)] w-px bg-gray-300" />
 
             {/* Pickup */}
@@ -738,9 +579,7 @@ export default function ActiveRideCard({
                 </p>
 
                 <p className="mt-1 text-sm font-medium leading-5 text-gray-900">
-                  {currentRide.pickup
-                    ?.address ||
-                    'Pickup location'}
+                  {currentRide.pickup?.address || "Pickup location"}
                 </p>
               </div>
             </div>
@@ -758,9 +597,7 @@ export default function ActiveRideCard({
                 </p>
 
                 <p className="mt-1 text-sm font-medium leading-5 text-gray-900">
-                  {currentRide.destination
-                    ?.address ||
-                    'Destination'}
+                  {currentRide.destination?.address || "Destination"}
                 </p>
               </div>
             </div>
@@ -773,9 +610,7 @@ export default function ActiveRideCard({
               <div className="flex items-center gap-1.5 text-gray-400">
                 <Navigation className="h-4 w-4" />
 
-                <span className="text-xs">
-                  Distance
-                </span>
+                <span className="text-xs">Distance</span>
               </div>
 
               <p className="mt-1 text-sm font-semibold text-gray-900">
@@ -787,9 +622,7 @@ export default function ActiveRideCard({
               <div className="flex items-center gap-1.5 text-gray-400">
                 <Clock3 className="h-4 w-4" />
 
-                <span className="text-xs">
-                  Duration
-                </span>
+                <span className="text-xs">Duration</span>
               </div>
 
               <p className="mt-1 text-sm font-semibold text-gray-900">
@@ -801,9 +634,7 @@ export default function ActiveRideCard({
               <div className="flex items-center gap-1.5 text-gray-400">
                 <IndianRupee className="h-4 w-4" />
 
-                <span className="text-xs">
-                  Estimated
-                </span>
+                <span className="text-xs">Estimated</span>
               </div>
 
               <p className="mt-1 text-sm font-semibold text-gray-900">
@@ -814,9 +645,7 @@ export default function ActiveRideCard({
 
           {/* Action */}
 
-          <div className="mt-6">
-            {renderAction()}
-          </div>
+          <div className="mt-6">{renderAction()}</div>
 
           {/* Cancel */}
 
@@ -844,5 +673,5 @@ export default function ActiveRideCard({
         isLoading={isLoading}
       />
     </>
-  )
+  );
 }

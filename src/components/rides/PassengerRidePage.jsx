@@ -1,12 +1,5 @@
-'use client'
-
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
-
+"use client";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Car,
@@ -18,114 +11,97 @@ import {
   ShieldCheck,
   UserRound,
   XCircle,
-} from 'lucide-react'
+} from "lucide-react";
 
-import { useParams, useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
+import { useParams, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
-import {
-  cancelRideAPI,
-  getRideAPI,
-} from '../../api/ride.api'
+import { cancelRideAPI, getRideAPI } from "../../api/ride.api";
 
-const POLL_INTERVAL = 15000
-const RATE_LIMIT_RETRY_INTERVAL = 60000
+const POLL_INTERVAL = 15000;
+const RATE_LIMIT_RETRY_INTERVAL = 60000;
 
 const STATUS_CONFIG = {
   REQUESTED: {
-    title: 'Finding your driver',
-    description:
-      'We are looking for an available driver nearby.',
+    title: "Finding your driver",
+    description: "We are looking for an available driver nearby.",
   },
 
   ACCEPTED: {
-    title: 'Driver accepted',
-    description:
-      'Your driver has accepted the ride.',
+    title: "Driver accepted",
+    description: "Your driver has accepted the ride.",
   },
 
   DRIVER_ARRIVING: {
-    title: 'Driver is on the way',
-    description:
-      'Your driver is coming to the pickup location.',
+    title: "Driver is on the way",
+    description: "Your driver is coming to the pickup location.",
   },
 
   DRIVER_ARRIVED: {
-    title: 'Driver has arrived',
-    description:
-      'Your driver is waiting at the pickup location.',
+    title: "Driver has arrived",
+    description: "Your driver is waiting at the pickup location.",
   },
 
   OTP_VERIFIED: {
-    title: 'Ride starting',
-    description:
-      'Your OTP has been verified.',
+    title: "Ride starting",
+    description: "Your OTP has been verified.",
   },
 
   IN_PROGRESS: {
-    title: 'Ride in progress',
-    description:
-      'You are on your way to your destination.',
+    title: "Ride in progress",
+    description: "You are on your way to your destination.",
   },
 
   COMPLETED: {
-    title: 'Ride completed',
-    description:
-      'You have reached your destination.',
+    title: "Ride completed",
+    description: "You have reached your destination.",
   },
 
   CANCELLED: {
-    title: 'Ride cancelled',
-    description:
-      'This ride has been cancelled.',
+    title: "Ride cancelled",
+    description: "This ride has been cancelled.",
   },
 
   REJECTED: {
-    title: 'Ride unavailable',
-    description:
-      'This ride request is no longer available.',
+    title: "Ride unavailable",
+    description: "This ride request is no longer available.",
   },
-}
+};
 
 export default function PassengerRidePage() {
-  const params = useParams()
-  const router = useRouter()
+  const params = useParams();
+  const router = useRouter();
 
-  const rideId = params?.rideId
+  const rideId = params?.rideId;
 
-  const [ride, setRide] = useState(null)
-  const [rideOtp, setRideOtp] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [cancelling, setCancelling] = useState(false)
-  const [error, setError] = useState('')
+  const [ride, setRide] = useState(null);
+  const [rideOtp, setRideOtp] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
+  const [error, setError] = useState("");
 
-  // --------------------------------------------------
+  //
   // Restore OTP from the ride created by the passenger
-  // --------------------------------------------------
+  //
 
   useEffect(() => {
     if (!rideId) {
-      return
+      return;
     }
 
     try {
-      const storedRide =
-        sessionStorage.getItem('activeRide')
+      const storedRide = sessionStorage.getItem("activeRide");
 
       if (!storedRide) {
-        return
+        return;
       }
 
-      const parsed = JSON.parse(storedRide)
+      const parsed = JSON.parse(storedRide);
 
-      const storedRideData =
-        parsed?.ride
+      const storedRideData = parsed?.ride;
 
-      if (
-        String(storedRideData?.id) !==
-        String(rideId)
-      ) {
-        return
+      if (String(storedRideData?.id) !== String(rideId)) {
+        return;
       }
 
       /*
@@ -133,12 +109,10 @@ export default function PassengerRidePage() {
        * The GET /api/rides/:id endpoint does not return
        * the plain OTP, so keep it separately from ride state.
        */
-      const otp = String(
-        storedRideData?.otp || ''
-      ).trim()
+      const otp = String(storedRideData?.otp || "").trim();
 
       if (/^\d{4}$/.test(otp)) {
-        setRideOtp(otp)
+        setRideOtp(otp);
       }
 
       /*
@@ -148,22 +122,19 @@ export default function PassengerRidePage() {
        */
       setRide((currentRide) => {
         if (currentRide) {
-          return currentRide
+          return currentRide;
         }
 
-        return storedRideData || null
-      })
+        return storedRideData || null;
+      });
     } catch (storageError) {
-      console.error(
-        'Failed to restore active ride:',
-        storageError
-      )
+      console.error("Failed to restore active ride:", storageError);
     }
-  }, [rideId])
+  }, [rideId]);
 
-  // --------------------------------------------------
+  //
   // Load ride
-  // --------------------------------------------------
+  //
 
   const loadRide = useCallback(
     async (showLoader = false) => {
@@ -172,26 +143,20 @@ export default function PassengerRidePage() {
           success: false,
           rateLimited: false,
           ride: null,
-        }
+        };
       }
 
       try {
         if (showLoader) {
-          setLoading(true)
+          setLoading(true);
         }
 
-        const response =
-          await getRideAPI(rideId)
+        const response = await getRideAPI(rideId);
 
-        const data =
-          response?.data ||
-          response?.ride ||
-          response
+        const data = response?.data || response?.ride || response;
 
         if (!data) {
-          throw new Error(
-            'Ride information is unavailable'
-          )
+          throw new Error("Ride information is unavailable");
         }
 
         /*
@@ -208,23 +173,19 @@ export default function PassengerRidePage() {
         setRide((currentRide) => ({
           ...(currentRide || {}),
           ...data,
-        }))
+        }));
 
-        setError('')
+        setError("");
 
         return {
           success: true,
           rateLimited: false,
           ride: data,
-        }
+        };
       } catch (err) {
-        console.error(
-          'Failed to load ride:',
-          err
-        )
+        console.error("Failed to load ride:", err);
 
-        const statusCode =
-          err?.response?.status
+        const statusCode = err?.response?.status;
 
         /*
          * Rate limited:
@@ -232,98 +193,81 @@ export default function PassengerRidePage() {
          */
         if (statusCode === 429) {
           console.warn(
-            'Ride polling was rate limited. Retrying after 60 seconds.'
-          )
-
+            "Ride polling was rate limited. Retrying after 60 seconds.",
+          );
           return {
             success: false,
             rateLimited: true,
             ride: null,
-          }
+          };
         }
-
         /*
          * Keep the locally restored ride visible
          * if the API temporarily fails.
          */
         if (!ride) {
-          setError(
-            err?.response?.data?.message ||
-              'Unable to load ride'
-          )
+          setError(err?.response?.data?.message || "Unable to load ride");
         }
 
         return {
           success: false,
           rateLimited: false,
           ride: null,
-        }
+        };
       } finally {
         if (showLoader) {
-          setLoading(false)
+          setLoading(false);
         }
       }
     },
-    [rideId, ride]
-  )
+    [rideId, ride],
+  );
 
-  // --------------------------------------------------
+  //
   // Initial load
-  // --------------------------------------------------
+  //
 
   useEffect(() => {
     if (!rideId) {
-      return
+      return;
     }
 
-    loadRide(true)
-  }, [rideId])
+    loadRide(true);
+  }, [rideId]);
 
-  // --------------------------------------------------
+  //
   // Poll ride status
-  // --------------------------------------------------
+  //
 
   useEffect(() => {
     if (!rideId) {
-      return
+      return;
     }
 
-    let cancelled = false
-    let timer = null
+    let cancelled = false;
+    let timer = null;
 
-    const terminalStatuses = [
-      'COMPLETED',
-      'CANCELLED',
-      'REJECTED',
-    ]
+    const terminalStatuses = ["COMPLETED", "CANCELLED", "REJECTED"];
 
     const poll = async () => {
       if (cancelled) {
-        return
+        return;
       }
 
-      const result =
-        await loadRide(false)
+      const result = await loadRide(false);
 
       if (cancelled) {
-        return
+        return;
       }
 
-      const currentStatus =
-        String(
-          result?.ride?.status || ''
-        ).toUpperCase()
+      const currentStatus = String(result?.ride?.status || "").toUpperCase();
 
       /*
        * Stop polling once the ride reaches
        * a terminal state.
        */
-      if (
-        terminalStatuses.includes(
-          currentStatus
-        )
-      ) {
-        return
+      if (terminalStatuses.includes(currentStatus)) {
+        return;
       }
 
       /*
@@ -333,260 +277,210 @@ export default function PassengerRidePage() {
        * Rate limited:
        * 60 seconds
        */
-      const nextDelay =
-        result?.rateLimited
-          ? RATE_LIMIT_RETRY_INTERVAL
-          : POLL_INTERVAL
+      const nextDelay = result?.rateLimited
+        ? RATE_LIMIT_RETRY_INTERVAL
+        : POLL_INTERVAL;
 
-      timer = setTimeout(
-        poll,
-        nextDelay
-      )
-    }
+      timer = setTimeout(poll, nextDelay);
+    };
 
     /*
      * Don't immediately hit the API again.
      * The initial load already happens separately.
      */
-    timer = setTimeout(
-      poll,
-      POLL_INTERVAL
-    )
+    timer = setTimeout(poll, POLL_INTERVAL);
 
     return () => {
-      cancelled = true
+      cancelled = true;
 
       if (timer) {
-        clearTimeout(timer)
+        clearTimeout(timer);
       }
-    }
-  }, [rideId, loadRide])
+    };
+  }, [rideId, loadRide]);
 
-  // --------------------------------------------------
+  //
   // Cancel ride
-  // --------------------------------------------------
+  //
 
   const handleCancel = async () => {
     if (!ride?.id || cancelling) {
-      return
+      return;
     }
 
-    const confirmed =
-      window.confirm(
-        'Are you sure you want to cancel this ride?'
-      )
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this ride?",
+    );
 
     if (!confirmed) {
-      return
+      return;
     }
 
     try {
-      setCancelling(true)
+      setCancelling(true);
 
-      const response =
-        await cancelRideAPI(ride.id)
+      const response = await cancelRideAPI(ride.id);
 
-      const updatedRide =
-        response?.data ||
-        response?.ride
+      const updatedRide = response?.data || response?.ride;
 
       if (updatedRide) {
         setRide((currentRide) => ({
           ...(currentRide || {}),
           ...updatedRide,
-        }))
+        }));
       } else {
-        await loadRide(false)
+        await loadRide(false);
       }
 
-      toast.success(
-        'Ride cancelled'
-      )
+      toast.success("Ride cancelled");
     } catch (err) {
-      console.error(
-        'Cancel ride error:',
-        err
-      )
+      console.error("Cancel ride error:", err);
 
-      toast.error(
-        err?.response?.data?.message ||
-          'Unable to cancel ride'
-      )
+      toast.error(err?.response?.data?.message || "Unable to cancel ride");
     } finally {
-      setCancelling(false)
+      setCancelling(false);
     }
-  }
+  };
 
-  // --------------------------------------------------
+  //
   // Ride status
-  // --------------------------------------------------
+  //
 
-  const status = String(
-    ride?.status || 'REQUESTED'
-  ).toUpperCase()
+  const status = String(ride?.status || "REQUESTED").toUpperCase();
 
-  const statusConfig =
-    STATUS_CONFIG[status] ||
-    STATUS_CONFIG.REQUESTED
+  const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.REQUESTED;
 
   const isTerminal =
-    status === 'COMPLETED' ||
-    status === 'CANCELLED' ||
-    status === 'REJECTED'
+    status === "COMPLETED" || status === "CANCELLED" || status === "REJECTED";
 
   /*
    * Backend permits cancellation while the driver
    * is already marked as arrived.
    */
   const canCancel =
-    status === 'REQUESTED' ||
-    status === 'ACCEPTED' ||
-    status === 'DRIVER_ARRIVING' ||
-    status === 'DRIVER_ARRIVED'
+    status === "REQUESTED" ||
+    status === "ACCEPTED" ||
+    status === "DRIVER_ARRIVING" ||
+    status === "DRIVER_ARRIVED";
 
-  // --------------------------------------------------
+  //
   // Driver / vehicle
-  // --------------------------------------------------
+  //
 
-  const driver =
-    ride?.driver || null
+  const driver = ride?.driver || null;
 
-  const vehicle =
-    ride?.vehicle || null
+  const vehicle = ride?.vehicle || null;
 
-  const fare = Number(
-    ride?.finalFare ??
-      ride?.estimatedFare ??
-      0
-  )
+  const fare = Number(ride?.finalFare ?? ride?.estimatedFare ?? 0);
 
-  const vehicleLabel =
-    getVehicleLabel(
-      vehicle?.vehicleType ||
-        ride?.vehicleType
-    )
+  const vehicleLabel = getVehicleLabel(
+    vehicle?.vehicleType || ride?.vehicleType,
+  );
 
-  // --------------------------------------------------
+  //
   // Status steps
-  // --------------------------------------------------
+  //
 
   const statusSteps = useMemo(
     () => [
       {
-        key: 'REQUESTED',
-        label: 'Requested',
+        key: "REQUESTED",
+        label: "Requested",
       },
       {
-        key: 'ACCEPTED',
-        label: 'Accepted',
+        key: "ACCEPTED",
+        label: "Accepted",
       },
       {
-        key: 'DRIVER_ARRIVING',
-        label: 'Driver arriving',
+        key: "DRIVER_ARRIVING",
+        label: "Driver arriving",
       },
       {
-        key: 'DRIVER_ARRIVED',
-        label: 'Driver arrived',
+        key: "DRIVER_ARRIVED",
+        label: "Driver arrived",
       },
       {
-        key: 'IN_PROGRESS',
-        label: 'In progress',
+        key: "IN_PROGRESS",
+        label: "In progress",
       },
       {
-        key: 'COMPLETED',
-        label: 'Completed',
+        key: "COMPLETED",
+        label: "Completed",
       },
     ],
-    []
-  )
+    [],
+  );
 
-  // --------------------------------------------------
+  //
   // Loading
-  // --------------------------------------------------
+  //
 
   if (loading && !ride) {
     return (
       <main className="min-h-screen bg-gray-50">
         <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-4">
           <div className="flex items-center gap-3 text-sm text-gray-600">
-            <Loader2
-              size={20}
-              className="animate-spin"
-            />
-
+            <Loader2 size={20} className="animate-spin" />
             Loading your ride...
           </div>
         </div>
       </main>
-    )
+    );
   }
 
-  // --------------------------------------------------
+  //
   // Error
-  // --------------------------------------------------
+  //
 
   if (error && !ride) {
     return (
       <main className="min-h-screen bg-gray-50">
         <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-4">
-          <div className="w-full rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm">
-            <XCircle
-              size={42}
-              className="mx-auto text-red-500"
-            />
+          <div className="w-full rounded-3xl border border-gray-200 bg-white p-6 text-center shadow-sm">
+            <XCircle size={42} className="mx-auto text-red-500" />
 
             <h1 className="mt-4 text-lg font-semibold text-gray-900">
               Ride could not be loaded
             </h1>
 
-            <p className="mt-2 text-sm text-gray-500">
-              {error}
-            </p>
+            <p className="mt-2 text-sm text-gray-500">{error}</p>
 
             <button
               type="button"
-              onClick={() =>
-                router.push('/')
-              }
-              className="mt-5 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
+              onClick={() => router.push("/")}
+              className="mt-5 rounded-xl bg-mauve-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-mauve-800"
             >
               Back to home
             </button>
           </div>
         </div>
       </main>
-    )
+    );
   }
 
-  // --------------------------------------------------
+  //
   // Page
-  // --------------------------------------------------
+  //
 
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:py-8">
-
         {/* Header */}
 
         <div className="mb-5 flex items-center justify-between">
           <button
             type="button"
-            onClick={() =>
-              router.push('/')
-            }
-            className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            onClick={() => router.push("/")}
+            className="flex items-center gap-2 rounded-lg text-sm font-medium text-mauve-700 transition hover:text-mauve-900"
           >
             <ArrowLeft size={18} />
-
             Back
           </button>
 
           <div className="text-right">
-            <p className="text-xs text-gray-400">
-              Ride ID
-            </p>
+            <p className="text-xs text-gray-400">Ride ID</p>
 
-            <p className="max-w-[180px] truncate text-xs font-medium text-gray-600">
+            <p className="max-w-45 truncate text-xs font-medium text-gray-600">
               {ride?.id}
             </p>
           </div>
@@ -594,13 +488,13 @@ export default function PassengerRidePage() {
 
         {/* Status */}
 
-        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+        <section className="relative isolate overflow-hidden rounded-3xl bg-mauve-950 p-5 text-white shadow-xl shadow-mauve-950/10 sm:p-7">
+          <div className="absolute -right-16 -top-24 -z-10 h-64 w-64 rounded-full bg-mauve-700/50 blur-3xl" />
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-              {status === 'COMPLETED' ? (
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-mauve-100">
+              {status === "COMPLETED" ? (
                 <CheckCircle2 size={25} />
-              ) : status === 'CANCELLED' ||
-                status === 'REJECTED' ? (
+              ) : status === "CANCELLED" || status === "REJECTED" ? (
                 <XCircle size={25} />
               ) : (
                 <Clock3 size={25} />
@@ -608,141 +502,111 @@ export default function PassengerRidePage() {
             </div>
 
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-semibold text-gray-900">
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-mauve-200/70">
+                RIDE STATUS
+              </p>
+              <h1 className="text-xl font-semibold text-white">
                 {statusConfig.title}
               </h1>
 
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-mauve-100/75">
                 {statusConfig.description}
               </p>
             </div>
           </div>
 
           <div className="mt-6 overflow-x-auto pb-1">
-            <div className="flex min-w-[650px] items-start">
-              {statusSteps.map(
-                (step, index) => {
-                  const active =
-                    isStepActive(
-                      status,
-                      step.key
-                    )
+            <div className="flex min-w-162.5 items-start">
+              {statusSteps.map((step, index) => {
+                const active = isStepActive(status, step.key);
 
-                  const completed =
-                    isStepCompleted(
-                      status,
-                      step.key
-                    )
+                const completed = isStepCompleted(status, step.key);
 
-                  return (
-                    <div
-                      key={step.key}
-                      className="flex flex-1 items-start"
-                    >
-                      <div className="flex flex-col items-center">
-                        <div
-                          className={[
-                            'flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold',
-                            active ||
-                            completed
-                              ? 'border-blue-600 bg-blue-600 text-white'
-                              : 'border-gray-200 bg-white text-gray-400',
-                          ].join(' ')}
-                        >
-                          {completed ? (
-                            <CheckCircle2
-                              size={15}
-                            />
-                          ) : (
-                            index + 1
-                          )}
-                        </div>
-
-                        <span
-                          className={[
-                            'mt-2 whitespace-nowrap text-[11px]',
-                            active ||
-                            completed
-                              ? 'font-medium text-gray-800'
-                              : 'text-gray-400',
-                          ].join(' ')}
-                        >
-                          {step.label}
-                        </span>
+                return (
+                  <div key={step.key} className="flex flex-1 items-start">
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={[
+                          "flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold",
+                          active || completed
+                            ? "border-mauve-300 bg-mauve-500 text-white"
+                            : "border-white/20 bg-white/5 text-mauve-200/50",
+                        ].join(" ")}
+                      >
+                        {completed ? <CheckCircle2 size={15} /> : index + 1}
                       </div>
 
-                      {index <
-                        statusSteps.length -
-                          1 && (
-                        <div
-                          className={[
-                            'mt-4 h-px flex-1',
-                            isStepCompleted(
-                              status,
-                              statusSteps[
-                                index + 1
-                              ].key
-                            )
-                              ? 'bg-blue-600'
-                              : 'bg-gray-200',
-                          ].join(' ')}
-                        />
-                      )}
+                      <span
+                        className={[
+                          "mt-2 whitespace-nowrap text-[11px]",
+                          active || completed
+                            ? "font-medium text-white"
+                            : "text-mauve-100/50",
+                        ].join(" ")}
+                      >
+                        {step.label}
+                      </span>
                     </div>
-                  )
-                }
-              )}
+
+                    {index < statusSteps.length - 1 && (
+                      <div
+                        className={[
+                          "mt-4 h-px flex-1",
+                          isStepCompleted(status, statusSteps[index + 1].key)
+                            ? "bg-mauve-300"
+                            : "bg-white/15",
+                        ].join(" ")}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
 
         {/* Journey */}
 
-        <section className="mt-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-900">
-            Your journey
-          </h2>
+        <section className="mt-5 rounded-3xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="mb-5 flex items-center gap-3 border-b border-gray-100 pb-4">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-mauve-50 text-mauve-700">
+              <MapPin size={17} />
+            </span>
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900">
+                Your journey
+              </h2>
+              <p className="mt-0.5 text-xs text-gray-500">
+                Pickup, destination and ride details
+              </p>
+            </div>
+          </div>
 
           <div className="mt-5 space-y-5">
             <LocationRow
-              icon={
-                <MapPin size={17} />
-              }
+              icon={<MapPin size={17} />}
               label="Pickup"
-              value={
-                ride?.pickupAddress ||
-                'Pickup location'
-              }
+              value={ride?.pickupAddress || "Pickup location"}
             />
 
-            <div className="ml-[9px] h-5 border-l border-dashed border-gray-300" />
+            <div className="ml-2.25 h-5 border-l border-dashed border-gray-300" />
 
             <LocationRow
-              icon={
-                <MapPin size={17} />
-              }
+              icon={<MapPin size={17} />}
               label="Destination"
-              value={
-                ride?.destinationAddress ||
-                'Destination'
-              }
+              value={ride?.destinationAddress || "Destination"}
             />
           </div>
 
           <div className="mt-6 grid grid-cols-2 gap-3 border-t border-gray-100 pt-5 sm:grid-cols-4">
-            <InfoItem
-              label="Vehicle"
-              value={vehicleLabel}
-            />
+            <InfoItem label="Vehicle" value={vehicleLabel} />
 
             <InfoItem
               label="Distance"
               value={
                 ride?.distanceKm
-                  ? `${Number(
-                      ride.distanceKm
-                    ).toFixed(1)} km`
-                  : '—'
+                  ? `${Number(ride.distanceKm).toFixed(1)} km`
+                  : "—"
               }
             />
 
@@ -750,31 +614,25 @@ export default function PassengerRidePage() {
               label="Duration"
               value={
                 ride?.durationMinutes
-                  ? `${Math.round(
-                      ride.durationMinutes
-                    )} min`
-                  : '—'
+                  ? `${Math.round(ride.durationMinutes)} min`
+                  : "—"
               }
             />
 
-            <InfoItem
-              label="Estimated fare"
-              value={`₹${fare.toFixed(0)}`}
-            />
+            <InfoItem label="Estimated fare" value={`₹${fare.toFixed(0)}`} />
           </div>
         </section>
 
         {/* Driver */}
 
         {driver && (
-          <section className="mt-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <section className="mt-5 rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-gray-900">
                 Your driver
               </h2>
 
-              {status ===
-                'DRIVER_ARRIVED' && (
+              {status === "DRIVER_ARRIVED" && (
                 <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
                   Arrived
                 </span>
@@ -782,28 +640,22 @@ export default function PassengerRidePage() {
             </div>
 
             <div className="mt-5 flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-600">
-                <UserRound
-                  size={23}
-                />
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-mauve-50 text-mauve-700">
+                <UserRound size={23} />
               </div>
 
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-gray-900">
-                  {getDriverName(
-                    driver
-                  )}
+                  {getDriverName(driver)}
                 </p>
 
-                <p className="mt-1 text-xs text-gray-500">
-                  Your driver
-                </p>
+                <p className="mt-1 text-xs text-gray-500">Your driver</p>
               </div>
 
               {driver.phone && (
                 <a
                   href={`tel:${driver.phone}`}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-mauve-200 text-mauve-700 transition hover:bg-mauve-50"
                   aria-label="Call driver"
                 >
                   <Phone size={17} />
@@ -812,36 +664,24 @@ export default function PassengerRidePage() {
             </div>
 
             {vehicle && (
-              <div className="mt-5 rounded-xl bg-gray-50 p-4">
+              <div className="mt-5 rounded-2xl bg-mauve-50/70 p-4">
                 <div className="flex items-center gap-3">
-                  <Car
-                    size={20}
-                    className="text-gray-600"
-                  />
+                  <Car size={20} className="text-mauve-700" />
 
                   <div>
-                    <p className="text-xs text-gray-500">
-                      Vehicle
-                    </p>
+                    <p className="text-xs text-gray-500">Vehicle</p>
 
                     <p className="mt-0.5 font-semibold text-gray-900">
-                      {vehicle.vehicleNumber ||
-                        'Vehicle assigned'}
+                      {vehicle.vehicleNumber || "Vehicle assigned"}
                     </p>
                   </div>
                 </div>
 
-                {(vehicle.brand ||
-                  vehicle.model ||
-                  vehicle.color) && (
+                {(vehicle.brand || vehicle.model || vehicle.color) && (
                   <p className="mt-3 text-xs text-gray-500">
-                    {[
-                      vehicle.brand,
-                      vehicle.model,
-                      vehicle.color,
-                    ]
+                    {[vehicle.brand, vehicle.model, vehicle.color]
                       .filter(Boolean)
-                      .join(' • ')}
+                      .join(" • ")}
                   </p>
                 )}
               </div>
@@ -851,29 +691,22 @@ export default function PassengerRidePage() {
 
         {/* OTP */}
 
-        {status ===
-          'DRIVER_ARRIVED' && (
-          <section className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5">
+        {status === "DRIVER_ARRIVED" && (
+          <section className="mt-5 rounded-3xl border border-mauve-200 bg-mauve-50 p-5">
             <div className="flex items-start gap-3">
-              <ShieldCheck
-                size={22}
-                className="mt-0.5 text-blue-600"
-              />
+              <ShieldCheck size={22} className="mt-0.5 text-mauve-700" />
 
               <div>
-                <h2 className="font-semibold text-blue-900">
-                  Ride OTP
-                </h2>
+                <h2 className="font-semibold text-mauve-900">Ride OTP</h2>
 
-                <p className="mt-1 text-sm text-blue-700">
-                  Share this OTP with your driver
-                  only when you are ready to start
-                  the ride.
+                <p className="mt-1 text-sm text-mauve-800">
+                  Share this OTP with your driver only when you are ready to
+                  start the ride.
                 </p>
               </div>
             </div>
 
-            <div className="mt-5 rounded-xl border border-blue-200 bg-white px-4 py-5 text-center">
+            <div className="mt-5 rounded-2xl border border-mauve-200 bg-white px-4 py-5 text-center">
               <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
                 Your OTP
               </p>
@@ -899,39 +732,26 @@ export default function PassengerRidePage() {
 
         {/* Completed */}
 
-        {status ===
-          'COMPLETED' && (
-          <section className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5">
+        {status === "COMPLETED" && (
+          <section className="mt-5 rounded-3xl border border-green-200 bg-green-50 p-5">
             <div className="flex items-center gap-3">
-              <CheckCircle2
-                size={23}
-                className="text-green-600"
-              />
+              <CheckCircle2 size={23} className="text-green-600" />
 
               <div>
-                <h2 className="font-semibold text-green-900">
-                  Ride completed
-                </h2>
+                <h2 className="font-semibold text-green-900">Ride completed</h2>
 
                 <p className="mt-1 text-sm text-green-700">
-                  Thank you for travelling with
-                  SmartCity.
+                  Thank you for travelling with SmartCity.
                 </p>
               </div>
             </div>
 
             <div className="mt-5 flex items-center justify-between border-t border-green-200 pt-4">
-              <span className="text-sm text-green-800">
-                Final fare
-              </span>
+              <span className="text-sm text-green-800">Final fare</span>
 
               <span className="text-xl font-bold text-green-900">
                 ₹
-                {Number(
-                  ride?.finalFare ??
-                    ride?.estimatedFare ??
-                    0
-                ).toFixed(0)}
+                {Number(ride?.finalFare ?? ride?.estimatedFare ?? 0).toFixed(0)}
               </span>
             </div>
           </section>
@@ -944,20 +764,15 @@ export default function PassengerRidePage() {
             type="button"
             disabled={cancelling}
             onClick={handleCancel}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {cancelling ? (
-              <Loader2
-                size={17}
-                className="animate-spin"
-              />
+              <Loader2 size={17} className="animate-spin" />
             ) : (
               <XCircle size={17} />
             )}
 
-            {cancelling
-              ? 'Cancelling...'
-              : 'Cancel ride'}
+            {cancelling ? "Cancelling..." : "Cancel ride"}
           </button>
         )}
 
@@ -966,116 +781,82 @@ export default function PassengerRidePage() {
         {isTerminal && (
           <button
             type="button"
-            onClick={() =>
-              router.push('/')
-            }
-            className="mt-4 w-full rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white hover:bg-gray-800"
+            onClick={() => router.push("/")}
+            className="mt-4 w-full rounded-xl bg-mauve-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-mauve-800"
           >
             Back to home
           </button>
         )}
       </div>
     </main>
-  )
+  );
 }
 
-// --------------------------------------------------
+//
 // Reusable components
-// --------------------------------------------------
+//
 
-function LocationRow({
-  icon,
-  label,
-  value,
-}) {
+function LocationRow({ icon, label, value }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-600">
+      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mauve-50 text-mauve-700">
         {icon}
       </div>
 
       <div className="min-w-0">
-        <p className="text-xs text-gray-400">
-          {label}
-        </p>
+        <p className="text-xs text-gray-400">{label}</p>
 
-        <p className="mt-1 text-sm font-medium text-gray-900">
-          {value}
-        </p>
+        <p className="mt-1 text-sm font-medium text-gray-900">{value}</p>
       </div>
     </div>
-  )
+  );
 }
 
-function InfoItem({
-  label,
-  value,
-}) {
+function InfoItem({ label, value }) {
   return (
     <div>
-      <p className="text-xs text-gray-400">
-        {label}
-      </p>
+      <p className="text-xs text-gray-400">{label}</p>
 
-      <p className="mt-1 text-sm font-semibold text-gray-800">
-        {value}
-      </p>
+      <p className="mt-1 text-sm font-semibold text-gray-800">{value}</p>
     </div>
-  )
+  );
 }
 
-// --------------------------------------------------
+//
 // Helpers
-// --------------------------------------------------
+//
 
-function getVehicleLabel(
-  vehicleType
-) {
-  const type = String(
-    vehicleType || ''
-  ).toLowerCase()
+function getVehicleLabel(vehicleType) {
+  const type = String(vehicleType || "").toLowerCase();
 
-  if (type === 'twowheeler') {
-    return 'Two Wheeler'
+  if (type === "twowheeler") {
+    return "Two Wheeler";
   }
 
-  if (type === 'auto') {
-    return 'Auto'
+  if (type === "auto") {
+    return "Auto";
   }
 
-  if (type === 'car') {
-    return 'Car'
+  if (type === "car") {
+    return "Car";
   }
 
-  return vehicleType || 'Ride'
+  return vehicleType || "Ride";
 }
 
-function getDriverName(
-  driver
-) {
+function getDriverName(driver) {
   if (!driver) {
-    return 'Driver'
+    return "Driver";
   }
 
-  const user = driver.user
+  const user = driver.user;
 
-  const fullName = [
-    user?.fname,
-    user?.lname,
-  ]
-    .filter(Boolean)
-    .join(' ')
+  const fullName = [user?.fname, user?.lname].filter(Boolean).join(" ");
 
-  return (
-    fullName ||
-    driver.name ||
-    'Driver'
-  )
+  return fullName || driver.name || "Driver";
 }
 
-function getStatusRank(
-  status
-) {
+function getStatusRank(status) {
   const ranks = {
     REQUESTED: 1,
     ACCEPTED: 2,
@@ -1084,41 +865,23 @@ function getStatusRank(
     OTP_VERIFIED: 5,
     IN_PROGRESS: 5,
     COMPLETED: 6,
-  }
+  };
 
-  return ranks[status] || 0
+  return ranks[status] || 0;
 }
 
-function isStepActive(
-  status,
-  step
-) {
-  if (
-    status === 'CANCELLED' ||
-    status === 'REJECTED'
-  ) {
-    return false
+function isStepActive(status, step) {
+  if (status === "CANCELLED" || status === "REJECTED") {
+    return false;
   }
 
-  return (
-    getStatusRank(status) ===
-    getStatusRank(step)
-  )
+  return getStatusRank(status) === getStatusRank(step);
 }
 
-function isStepCompleted(
-  status,
-  step
-) {
-  if (
-    status === 'CANCELLED' ||
-    status === 'REJECTED'
-  ) {
-    return false
+function isStepCompleted(status, step) {
+  if (status === "CANCELLED" || status === "REJECTED") {
+    return false;
   }
 
-  return (
-    getStatusRank(status) >
-    getStatusRank(step)
-  )
+  return getStatusRank(status) > getStatusRank(step);
 }

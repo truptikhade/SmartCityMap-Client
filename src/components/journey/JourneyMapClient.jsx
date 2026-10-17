@@ -79,6 +79,20 @@ function SelectedPlaceController({ selectedPlace }) {
   return null;
 }
 
+function InitialCenterController({ center, hasJourney, hasSelectedPlace }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (hasJourney || hasSelectedPlace) {
+      return;
+    }
+
+    map.setView(center, map.getZoom(), { animate: true });
+  }, [center[0], center[1], hasJourney, hasSelectedPlace, map]);
+
+  return null;
+}
+
 /*    
    ROAD ROUTE CONTROLLER
     */
@@ -808,6 +822,11 @@ export default function JourneyMapClient({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        <InitialCenterController
+          center={safeInitialCenter}
+          hasJourney={Boolean(journey)}
+          hasSelectedPlace={Boolean(selectedPlace)}
+        />
         <SelectedPlaceController selectedPlace={selectedPlace} />
 
         {isRoadTransport ? (
@@ -971,19 +990,6 @@ export default function JourneyMapClient({
           </Marker>
         )}
       </MapContainer>
-
-      {/*ROAD ROUTE LEGEND */}
-
-      {/* EMPTY MAP */}
-
-      {!journey && !selectedPlace && (
-        <div
-          className="pointer-events-none absolute bottom-4 left-1/2 z-[500]
-         -translate-x-1/2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow"
-        >
-          Search a route to see it on the map
-        </div>
-      )}
     </div>
   );
 }
@@ -992,7 +998,7 @@ export default function JourneyMapClient({
 
 function FareItem({ label, fare }) {
   return (
-    <div className="rounded-lg border border-gray-100 bg-white px-2 py-2">
+    <div className="rounded-lg border border-gray-50 bg-white px-2 py-2">
       <p className="text-[10px] text-gray-400">{label}</p>
       <p className="mt-0.5 text-xs font-semibold text-gray-900">
         ₹{Math.round(fare || 0)}

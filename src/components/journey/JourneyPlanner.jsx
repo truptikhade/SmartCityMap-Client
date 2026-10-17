@@ -1,48 +1,39 @@
-'use client'
+"use client";
 
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 
-import JourneySearch from './JourneySearch'
-import JourneyMap from './JourneyMap'
-import TransportOptions from './TransportOptions'
+import JourneySearch from "./JourneySearch";
+import JourneyMap from "./JourneyMap";
+import TransportOptions from "./TransportOptions";
 
-import AIAssistantPanel from '../ai/AIAssistantPanel'
-import AIAssistantButton from '../ai/AIAssistantButton'
+import AIAssistantPanel from "../ai/AIAssistantPanel";
+import AIAssistantButton from "../ai/AIAssistantButton";
 
 import {
   setJourney,
   setSelectedTransport,
   setSelectedPlace,
   clearJourney,
-} from '../../store/mapSlice'
+} from "../../store/mapSlice";
 
 export default function JourneyPlanner({
   initialJourney = null,
   initialCenter = [18.5204, 73.8567],
   showTitle = true,
 }) {
-  const router = useRouter()
-  const dispatch = useDispatch()
+  const router = useRouter();
+  const dispatch = useDispatch();
 
   // ---------------------------------------------
   // GLOBAL JOURNEY STATE
   // ---------------------------------------------
 
-  const journey = useSelector(
-    (state) => state.map.journey
-  )
-
-  const selectedTransport = useSelector(
-    (state) => state.map.selectedTransport
-  )
-
-  const selectedPlace = useSelector(
-    (state) => state.map.selectedPlace
-  )
-
-  const [aiOpen, setAiOpen] = useState(false)
+  const journey = useSelector((state) => state.map.journey);
+  const selectedTransport = useSelector((state) => state.map.selectedTransport);
+  const selectedPlace = useSelector((state) => state.map.selectedPlace);
+  const [aiOpen, setAiOpen] = useState(false);
 
   // ---------------------------------------------
   // INITIAL JOURNEY
@@ -56,64 +47,55 @@ export default function JourneyPlanner({
   //
   useEffect(() => {
     if (initialJourney) {
-      dispatch(setJourney(initialJourney))
+      dispatch(setJourney(initialJourney));
     }
-  }, [initialJourney, dispatch])
+  }, [initialJourney, dispatch]);
 
   // ---------------------------------------------
   // Journey search
   // ---------------------------------------------
 
   const handleSearch = (result) => {
-    dispatch(setJourney(result))
+    dispatch(setJourney(result));
 
     // A new search starts a new journey.
-    dispatch(setSelectedTransport(null))
-    dispatch(setSelectedPlace(null))
-  }
+    dispatch(setSelectedTransport(null));
+    dispatch(setSelectedPlace(null));
+  };
 
   // ---------------------------------------------
   // Clear Route
   // ---------------------------------------------
 
   const handleClearRoute = () => {
-    dispatch(clearJourney())
-  }
+    dispatch(clearJourney());
+  };
 
   // ---------------------------------------------
   // Booking
   // ---------------------------------------------
 
   const handleBook = (option) => {
-    sessionStorage.setItem(
-      'bookingData',
-      JSON.stringify(option)
-    )
-
-    router.push('/bookings/create')
-  }
+    sessionStorage.setItem("bookingData", JSON.stringify(option));
+    router.push("/bookings/create");
+  };
 
   // ---------------------------------------------
   // AI place selection
   // ---------------------------------------------
 
   const handleLocatePlace = (place) => {
-    dispatch(setSelectedPlace(place))
-  }
+    dispatch(setSelectedPlace(place));
+  };
 
   // ---------------------------------------------
   // Map center for AI
   // ---------------------------------------------
 
   const aiLatitude =
-    journey?.from?.lat ??
-    journey?.from?.latitude ??
-    initialCenter[0]
-
+    journey?.from?.lat ?? journey?.from?.latitude ?? initialCenter[0];
   const aiLongitude =
-    journey?.from?.lng ??
-    journey?.from?.longitude ??
-    initialCenter[1]
+    journey?.from?.lng ?? journey?.from?.longitude ?? initialCenter[1];
 
   // ---------------------------------------------
   // Render
@@ -121,7 +103,6 @@ export default function JourneyPlanner({
 
   return (
     <div className="w-full">
-
       {/* PAGE TITLE */}
       {showTitle && (
         <div className="mb-5">
@@ -130,63 +111,37 @@ export default function JourneyPlanner({
           </h1>
 
           <p className="mt-1 text-sm text-gray-500">
-            Search your destination, compare available
-            transport and book your journey.
+            Search your destination, compare available transport and book your
+            journey.
           </p>
         </div>
       )}
 
       {/* MAIN LAYOUT */}
       <div
-        className="
-          grid
-          grid-cols-1
-          gap-5
+        className="grid grid-cols-1 gap-5
           lg:grid-cols-[450px_minmax(0,1fr)]
         "
       >
-
         {/* LEFT SIDE */}
         <div className="space-y-4">
-
           <JourneySearch
             onSearch={handleSearch}
             onClear={handleClearRoute}
             initialFrom={
-              journey?.from?.name ||
-              journey?.from?.display_name ||
-              ''
+              journey?.from?.name || journey?.from?.display_name || ""
             }
-            initialTo={
-              journey?.to?.name ||
-              journey?.to?.display_name ||
-              ''
-            }
+            initialTo={journey?.to?.name || journey?.to?.display_name || ""}
           />
 
           {journey && (
-            <TransportOptions
-              journey={journey}
-              onBook={handleBook}
-            />
+            <TransportOptions journey={journey} onBook={handleBook} />
           )}
-
         </div>
 
         {/* RIGHT SIDE — MAP */}
         <div className="relative h-[620px] min-w-0">
-
-          <div
-            className="
-              absolute
-              inset-0
-              overflow-hidden
-              rounded-2xl
-              border
-              border-gray-200
-              bg-gray-100
-            "
-          >
+          <div className="absolute inset-0 overflow-hidden rounded-2xl border border-gray-200 bg-gray-100">
             <JourneyMap
               journey={journey}
               initialCenter={initialCenter}
@@ -200,39 +155,33 @@ export default function JourneyPlanner({
             <div
               className="
                 absolute
-                right-4
-                top-4
-                z-[1000]
+                inset-4
+                z-[1100]
+                flex
+                items-end
+                justify-end
               "
             >
               <AIAssistantPanel
                 lat={aiLatitude}
                 lng={aiLongitude}
                 onLocate={handleLocatePlace}
+                onClose={() => setAiOpen(false)}
               />
             </div>
           )}
 
           {/* AI BUTTON */}
-          <div
-            className="
-              absolute
-              bottom-4
-              right-4
-              z-[1100]
-            "
-          >
-            <AIAssistantButton
-              open={aiOpen}
-              onClick={() =>
-                setAiOpen((value) => !value)
-              }
-            />
-          </div>
-
+          {!aiOpen && (
+            <div className="absolute bottom-4 right-4 z-[1100]">
+              <AIAssistantButton
+                open={false}
+                onClick={() => setAiOpen(true)}
+              />
+            </div>
+          )}
         </div>
-
       </div>
     </div>
-  )
+  );
 }

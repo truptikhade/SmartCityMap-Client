@@ -1,64 +1,43 @@
-'use client'
+"use client";
 
-import {
-  CheckCircle2,
-  IndianRupee,
-  Route,
-  XCircle,
-} from 'lucide-react'
+import { CheckCircle2, IndianRupee, Route, XCircle } from "lucide-react";
 
-export default function DriverStats({
-  stats = {},
-}) {
-  const totalTrips =
-    stats.totalTrips ??
-    stats.total ??
-    0
+export default function DriverStats({ stats = {} }) {
+  const totalTrips = stats.totalTrips ?? stats.total ?? 0;
 
-  const completedTrips =
-    stats.completedTrips ??
-    stats.completed ??
-    0
+  const completedTrips = stats.completedTrips ?? stats.completed ?? 0;
 
-  const cancelledTrips =
-    stats.cancelledTrips ??
-    stats.cancelled ??
-    0
+  const cancelledTrips = stats.cancelledTrips ?? stats.cancelled ?? 0;
 
-  const totalEarnings =
-    stats.totalEarnings ??
-    stats.earnings ??
-    0
+  const totalEarnings = stats.totalEarnings ?? stats.earnings ?? 0;
 
   const cards = [
     {
-      label: 'Total Trips',
+      label: "Total Trips",
       value: totalTrips,
       icon: Route,
     },
     {
-      label: 'Completed',
+      label: "Completed",
       value: completedTrips,
       icon: CheckCircle2,
     },
     {
-      label: 'Cancelled',
+      label: "Cancelled",
       value: cancelledTrips,
       icon: XCircle,
     },
     {
-      label: 'Total Earnings',
-      value: `₹${Number(
-        totalEarnings
-      ).toFixed(0)}`,
+      label: "Total Earnings",
+      value: `₹${Number(totalEarnings).toFixed(0)}`,
       icon: IndianRupee,
     },
-  ]
+  ];
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {cards.map((card) => {
-        const Icon = card.icon
+        const Icon = card.icon;
 
         return (
           <div
@@ -75,12 +54,10 @@ export default function DriverStats({
               {card.value}
             </p>
 
-            <p className="mt-1 text-sm text-gray-500">
-              {card.label}
-            </p>
+            <p className="mt-1 text-sm text-gray-500">{card.label}</p>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

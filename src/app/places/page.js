@@ -1,35 +1,37 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { useRouter }           from 'next/navigation'
-import { MapPin, Star, Loader2 }        from 'lucide-react'
-import { getAllPlacesAPI }     from '../../api/places.api'
-import Navbar                  from '../../components/ui/Navbar'
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { MapPin, Star, Loader2 } from "lucide-react";
+import { getAllPlacesAPI } from "../../api/places.api";
+import Navbar from "../../components/ui/Navbar";
 
 export default function PlacesPage() {
-  const router = useRouter()
-  const [places, setPlaces]   = useState([])
-  const [loading, setLoading] = useState(true)
+  const router = useRouter();
+  const [places, setPlaces] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPlaces = async () => {
       try {
-        const res = await getAllPlacesAPI({ page: 1, limit: 20 })
-        setPlaces(res.data.data.places || [])
+        const res = await getAllPlacesAPI({ page: 1, limit: 20 });
+        setPlaces(res.data.data.places || []);
       } catch (err) {
-        console.error('Failed to load places:', err)
+        console.error("Failed to load places:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchPlaces()
-  }, [])
+    };
+    fetchPlaces();
+  }, []);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="animate-spin text-3xl"><Loader2 size={32} /></div>
+        <div className="animate-spin text-3xl">
+          <Loader2 size={32} />
+        </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -47,7 +49,7 @@ export default function PlacesPage() {
               <h3 className="text-white font-medium text-sm">{place.name}</h3>
               <p className="text-gray-500 text-xs flex items-center gap-1 mt-1">
                 <MapPin size={11} />
-                {place.address || 'No address'}
+                {place.address || "No address"}
               </p>
               <span className="flex items-center gap-1 text-yellow-400 text-xs mt-1">
                 <Star size={11} fill="currentColor" />
@@ -58,5 +60,5 @@ export default function PlacesPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,15 +1,15 @@
-'use client'
+"use client";
 
-import { ArrowRight, Bus, Car, Clock3, TrainFront, Users } from 'lucide-react'
+import { ArrowRight, Bus, Car, Clock3, TrainFront, Users } from "lucide-react";
 
 const icons = {
   bus: Bus,
   train: TrainFront,
   auto: Car,
-}
+};
 
-export default function TripCard({ trip, transitType = 'bus', onClick }) {
-  const Icon = icons[transitType] || Bus
+export default function TripCard({ trip, transitType = "bus", onClick }) {
+  const Icon = icons[transitType] || Bus;
 
   return (
     <button
@@ -24,17 +24,27 @@ export default function TripCard({ trip, transitType = 'bus', onClick }) {
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-gray-900">{trip.departureTime}</span>
+            <span className="text-sm font-semibold text-gray-900">
+              {trip.departureTime}
+            </span>
             {trip.arrivalTime && (
               <>
                 <ArrowRight size={14} className="text-gray-400" />
-                <span className="text-sm text-gray-600">{trip.arrivalTime}</span>
+                <span className="text-sm text-gray-600">
+                  {trip.arrivalTime}
+                </span>
               </>
             )}
           </div>
           <div className="mt-1 flex flex-wrap gap-3 text-xs text-gray-500">
-            <span className="flex items-center gap-1"><Clock3 size={12} />{trip.status}</span>
-            <span className="flex items-center gap-1"><Users size={12} />{trip.availableSeats} seats</span>
+            <span className="flex items-center gap-1">
+              <Clock3 size={12} />
+              {trip.status}
+            </span>
+            <span className="flex items-center gap-1">
+              <Users size={12} />
+              {trip.availableSeats} seats
+            </span>
             {trip.vehicleNumber && <span>{trip.vehicleNumber}</span>}
           </div>
         </div>
@@ -42,5 +52,5 @@ export default function TripCard({ trip, transitType = 'bus', onClick }) {
         <ArrowRight size={17} className="text-gray-400" />
       </div>
     </button>
-  )
+  );
 }

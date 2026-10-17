@@ -1,42 +1,52 @@
-'use client'
+"use client";
 
-import { Suspense, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
-import toast from 'react-hot-toast'
-import { Mail, Lock, User, Phone, Loader2, MapPin, Navigation, Eye, EyeOff } from 'lucide-react'
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import {
+  Mail,
+  Lock,
+  User,
+  Phone,
+  Loader2,
+  MapPin,
+  Navigation,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
-import { registerAPI, registerDriverAPI } from '../../api/auth.api'
+import { registerAPI, registerDriverAPI } from "../../api/auth.api";
 
-// --------------------------------------------------
+//
 // Theme — keep these in sync with the login page
-// --------------------------------------------------
+//
 
 // Use the SAME image file your login page uses on its left side
-const ILLUSTRATION = '/loginBackGround.png'
+const ILLUSTRATION = "/loginBackGround.png";
 
-const labelClass = 'mb-1.5 block text-sm font-medium text-mauve-900'
+const labelClass = "mb-1.5 block text-sm font-medium text-mauve-900";
 
 const inputBase =
-  'h-11 w-full rounded-xl border border-mauve-200 bg-white text-sm text-mauve-950 outline-none transition placeholder:text-mauve-400 focus:border-mauve-500 focus:ring-2 focus:ring-mauve-500/20 disabled:opacity-60'
-const inputClass = `${inputBase} px-3`
-const inputWithIcon = `${inputBase} pl-9 pr-3`
-const inputUpper = `${inputClass} uppercase placeholder:normal-case`
+  "h-11 w-full rounded-xl border border-mauve-200 bg-white text-sm text-mauve-950 outline-none transition placeholder:text-mauve-400 focus:border-mauve-500 focus:ring-2 focus:ring-mauve-500/20 disabled:opacity-60";
+const inputClass = `${inputBase} px-3`;
+const inputWithIcon = `${inputBase} pl-9 pr-3`;
+const inputUpper = `${inputClass} uppercase placeholder:normal-case`;
 
-const iconClass = 'absolute left-3 top-1/2 -translate-y-1/2 text-mauve-400'
+const iconClass = "absolute left-3 top-1/2 -translate-y-1/2 text-mauve-400";
 
 const primaryBtn =
-  'h-11 rounded-xl bg-mauve-800 text-sm font-semibold text-white transition hover:bg-mauve-900 disabled:cursor-not-allowed disabled:opacity-60'
+  "h-11 rounded-xl bg-mauve-800 text-sm font-semibold text-white transition hover:bg-mauve-900 disabled:cursor-not-allowed disabled:opacity-60";
 
 const steps = [
-  { id: 1, label: 'Personal' },
-  { id: 2, label: 'License' },
-  { id: 3, label: 'Vehicle' },
-]
+  { id: 1, label: "Personal" },
+  { id: 2, label: "License" },
+  { id: 3, label: "Vehicle" },
+];
 
-// --------------------------------------------------
+//
 // Small pieces
-// --------------------------------------------------
+//
 
 function InfoNote({ children }) {
   return (
@@ -46,10 +56,10 @@ function InfoNote({ children }) {
         <p className="text-xs leading-5 text-mauve-700">{children}</p>
       </div>
     </div>
-  )
+  );
 }
 
-function Field({ label, icon: Icon, className = '', children }) {
+function Field({ label, icon: Icon, className = "", children }) {
   return (
     <div className={className}>
       <label className={labelClass}>{label}</label>
@@ -62,7 +72,7 @@ function Field({ label, icon: Icon, className = '', children }) {
         children
       )}
     </div>
-  )
+  );
 }
 
 function ButtonLabel({ loading, loadingText, text }) {
@@ -71,7 +81,7 @@ function ButtonLabel({ loading, loadingText, text }) {
       {loading && <Loader2 size={17} className="animate-spin" />}
       {loading ? loadingText : text}
     </span>
-  )
+  );
 }
 
 function Stepper({ currentStep }) {
@@ -79,78 +89,83 @@ function Stepper({ currentStep }) {
     <div className="relative mb-6 flex items-start justify-between">
       <div
         className={`absolute left-[16.667%] top-4 h-[2px] w-[33.333%] -translate-y-1/2 transition-colors ${
-          currentStep > 1 ? 'bg-mauve-600' : 'bg-mauve-200'
+          currentStep > 1 ? "bg-mauve-600" : "bg-mauve-200"
         }`}
       />
       <div
         className={`absolute left-1/2 top-4 h-[2px] w-[33.333%] -translate-y-1/2 transition-colors ${
-          currentStep > 2 ? 'bg-mauve-600' : 'bg-mauve-200'
+          currentStep > 2 ? "bg-mauve-600" : "bg-mauve-200"
         }`}
       />
 
       {steps.map((step) => {
-        const active = currentStep >= step.id
+        const active = currentStep >= step.id;
         return (
-          <div key={step.id} className="relative z-10 flex w-1/3 flex-col items-center">
+          <div
+            key={step.id}
+            className="relative z-10 flex w-1/3 flex-col items-center"
+          >
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all ${
                 active
-                  ? 'bg-mauve-700 text-white ring-4 ring-mauve-100'
-                  : 'bg-mauve-100 text-mauve-400'
+                  ? "bg-mauve-700 text-white ring-4 ring-mauve-100"
+                  : "bg-mauve-100 text-mauve-400"
               }`}
             >
               {step.id}
             </div>
             <span
               className={`mt-2 text-xs font-medium ${
-                active ? 'text-mauve-800' : 'text-mauve-400'
+                active ? "text-mauve-800" : "text-mauve-400"
               }`}
             >
               {step.label}
             </span>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
 
-// --------------------------------------------------
+//
 // Form
-// --------------------------------------------------
+//
 
 function RegisterForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [role, setRole] = useState(searchParams.get('role') === 'driver' ? 'driver' : 'user')
-  const [currentStep, setCurrentStep] = useState(1)
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [role, setRole] = useState(
+    searchParams.get("role") === "driver" ? "driver" : "user",
+  );
+  const [currentStep, setCurrentStep] = useState(1);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    fname: '',
-    lname: '',
-    email: '',
-    phone: '',
-    password: '',
-    licenseNumber: '',
-    vehicleNumber: '',
-    vehicleType: 'car',
-    brand: '',
-    model: '',
-    color: '',
-  })
+    fname: "",
+    lname: "",
+    email: "",
+    phone: "",
+    password: "",
+    licenseNumber: "",
+    vehicleNumber: "",
+    vehicleType: "car",
+    brand: "",
+    model: "",
+    color: "",
+  });
 
   const handleChange = (event) => {
-    const { name, value } = event.target
-    setForm((current) => ({ ...current, [name]: value }))
-  }
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
 
   const handleRoleChange = (nextRole) => {
-    setRole(nextRole)
-    setCurrentStep(1)
-  }
+    setRole(nextRole);
+    setCurrentStep(1);
+  };
 
   // ---------------- Validation ----------------
 
@@ -162,23 +177,23 @@ function RegisterForm() {
       !form.phone.trim() ||
       !form.password
     ) {
-      toast.error('Please fill in all personal details')
-      return false
+      toast.error("Please fill in all personal details");
+      return false;
     }
     if (form.password.length < 6) {
-      toast.error('Password must be at least 6 characters')
-      return false
+      toast.error("Password must be at least 6 characters");
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   const validateDriverFields = () => {
     if (!form.licenseNumber.trim()) {
-      toast.error('Please enter your license number')
-      return false
+      toast.error("Please enter your license number");
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   const validateVehicleFields = () => {
     if (
@@ -188,35 +203,40 @@ function RegisterForm() {
       !form.model.trim() ||
       !form.color.trim()
     ) {
-      toast.error('Please fill in all vehicle details')
-      return false
+      toast.error("Please fill in all vehicle details");
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   // ---------------- Navigation ----------------
 
   const handleNextStep = () => {
-    if (currentStep === 1 && validateCommonFields()) setCurrentStep(2)
-    else if (currentStep === 2 && validateDriverFields()) setCurrentStep(3)
-  }
+    if (currentStep === 1 && validateCommonFields()) setCurrentStep(2);
+    else if (currentStep === 2 && validateDriverFields()) setCurrentStep(3);
+  };
 
-  const handlePrevStep = () => setCurrentStep((previous) => Math.max(previous - 1, 1))
+  const handlePrevStep = () =>
+    setCurrentStep((previous) => Math.max(previous - 1, 1));
 
   // ---------------- Submit ----------------
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    if (role === 'driver' && currentStep < 3) {
-      handleNextStep()
-      return
+    if (role === "driver" && currentStep < 3) {
+      handleNextStep();
+      return;
     }
 
-    if (!validateCommonFields()) return
-    if (role === 'driver' && (!validateDriverFields() || !validateVehicleFields())) return
+    if (!validateCommonFields()) return;
+    if (
+      role === "driver" &&
+      (!validateDriverFields() || !validateVehicleFields())
+    )
+      return;
 
-    setLoading(true)
+    setLoading(true);
 
     try {
       const personal = {
@@ -225,11 +245,11 @@ function RegisterForm() {
         email: form.email.trim(),
         phone: form.phone.trim(),
         password: form.password,
-      }
+      };
 
-      if (role === 'user') {
-        await registerAPI(personal)
-        toast.success('Account created successfully! Please login.')
+      if (role === "user") {
+        await registerAPI(personal);
+        toast.success("Account created successfully! Please login.");
       } else {
         await registerDriverAPI({
           ...personal,
@@ -239,18 +259,18 @@ function RegisterForm() {
           brand: form.brand.trim() || undefined,
           model: form.model.trim() || undefined,
           color: form.color.trim() || undefined,
-        })
-        toast.success('Driver account created successfully! Please login.')
+        });
+        toast.success("Driver account created successfully! Please login.");
       }
 
-      router.replace('/login')
+      router.replace("/login");
     } catch (error) {
-      console.error('Registration error:', error)
-      toast.error(error?.response?.data?.message || 'Registration failed')
+      console.error("Registration error:", error);
+      toast.error(error?.response?.data?.message || "Registration failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // ---------------- UI ----------------
 
@@ -274,14 +294,17 @@ function RegisterForm() {
               {/* <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-mauve-600 text-white">
                 <MapPin size={26} />
               </div> */}
-              <h1 className="text-2xl font-bold tracking-tight text-mauve-950"> {role === 'driver' ? 'Registration' : 'Registration'}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-mauve-950">
+                {" "}
+                {role === "driver" ? "Registration" : "Registration"}
+              </h1>
             </div>
 
             {/* Role toggle */}
             <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-mauve-100 p-1">
               {[
-                { value: 'user', label: 'Passenger' },
-                { value: 'driver', label: 'Driver' },
+                { value: "user", label: "Passenger" },
+                { value: "driver", label: "Driver" },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -289,8 +312,8 @@ function RegisterForm() {
                   onClick={() => handleRoleChange(option.value)}
                   className={`rounded-lg px-4 py-2.5 text-sm font-medium transition ${
                     role === option.value
-                      ? 'bg-white text-mauve-800 shadow-sm'
-                      : 'text-mauve-500 hover:text-mauve-700'
+                      ? "bg-white text-mauve-800 shadow-sm"
+                      : "text-mauve-500 hover:text-mauve-700"
                   }`}
                 >
                   {option.label}
@@ -298,7 +321,7 @@ function RegisterForm() {
               ))}
             </div>
 
-            {role === 'driver' && <Stepper currentStep={currentStep} />}
+            {role === "driver" && <Stepper currentStep={currentStep} />}
 
             <form onSubmit={handleSubmit}>
               {/* STEP 1 — Personal */}
@@ -360,7 +383,7 @@ function RegisterForm() {
 
                   <Field label="Password" icon={Lock} className="mt-4">
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       name="password"
                       value={form.password}
                       onChange={handleChange}
@@ -373,7 +396,9 @@ function RegisterForm() {
                       type="button"
                       onClick={() => setShowPassword((previous) => !previous)}
                       disabled={loading}
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-mauve-400 transition hover:text-mauve-600 disabled:opacity-50"
                     >
                       {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
@@ -383,7 +408,7 @@ function RegisterForm() {
               )}
 
               {/* STEP 2 — License */}
-              {role === 'driver' && currentStep === 2 && (
+              {role === "driver" && currentStep === 2 && (
                 <div className="animate-in fade-in duration-200">
                   <Field label="License Number">
                     <input
@@ -396,12 +421,14 @@ function RegisterForm() {
                       className={inputUpper}
                     />
                   </Field>
-                  <InfoNote>Make sure your license number is entered correctly.</InfoNote>
+                  <InfoNote>
+                    Make sure your license number is entered correctly.
+                  </InfoNote>
                 </div>
               )}
 
               {/* STEP 3 — Vehicle */}
-              {role === 'driver' && currentStep === 3 && (
+              {role === "driver" && currentStep === 3 && (
                 <div className="animate-in fade-in duration-200">
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="Vehicle Number">
@@ -470,14 +497,15 @@ function RegisterForm() {
                   </Field>
 
                   <InfoNote>
-                    Driver accounts require admin approval before you can receive ride requests.
+                    Driver accounts require admin approval before you can
+                    receive ride requests.
                   </InfoNote>
                 </div>
               )}
 
               {/* Buttons */}
               <div className="mt-6 flex items-center gap-3">
-                {role === 'driver' && currentStep > 1 && (
+                {role === "driver" && currentStep > 1 && (
                   <button
                     type="button"
                     onClick={handlePrevStep}
@@ -488,7 +516,7 @@ function RegisterForm() {
                   </button>
                 )}
 
-                {role === 'driver' && currentStep < 3 && (
+                {role === "driver" && currentStep < 3 && (
                   <button
                     type="button"
                     onClick={handleNextStep}
@@ -499,14 +527,26 @@ function RegisterForm() {
                   </button>
                 )}
 
-                {role === 'user' && (
-                  <button type="submit" disabled={loading} className={`${primaryBtn} w-full`}>
-                    <ButtonLabel loading={loading} loadingText="Creating account..." text="Sign Up" />
+                {role === "user" && (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className={`${primaryBtn} w-full`}
+                  >
+                    <ButtonLabel
+                      loading={loading}
+                      loadingText="Creating account..."
+                      text="Sign Up"
+                    />
                   </button>
                 )}
 
-                {role === 'driver' && currentStep === 3 && (
-                  <button type="submit" disabled={loading} className={`${primaryBtn} flex-1`}>
+                {role === "driver" && currentStep === 3 && (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className={`${primaryBtn} flex-1`}
+                  >
                     <ButtonLabel
                       loading={loading}
                       loadingText="Registering driver..."
@@ -519,8 +559,11 @@ function RegisterForm() {
 
             {/* Footer */}
             <p className="mt-6 text-center text-sm text-mauve-600">
-              Already have an account?{' '}
-              <Link href="/login" className="font-semibold text-mauve-950 hover:underline">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="font-semibold text-mauve-950 hover:underline"
+              >
                 Sign in
               </Link>
             </p>
@@ -528,7 +571,7 @@ function RegisterForm() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default function Register() {
@@ -536,5 +579,5 @@ export default function Register() {
     <Suspense fallback={null}>
       <RegisterForm />
     </Suspense>
-  )
+  );
 }
