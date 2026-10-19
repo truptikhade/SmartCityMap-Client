@@ -1,18 +1,22 @@
 import axios from "axios";
 
-const API_URL = (
+const API_ORIGIN = (
   process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000"
 )
   .replace(/\/+$/, "")
   .replace(/\/api$/i, "");
+const API_BASE_URL = typeof window === "undefined" ? API_ORIGIN : "";
 
 console.log("==============================");
-console.log("SmartCity API URL:", API_URL);
+console.log(
+  "SmartCity API requests:",
+  typeof window === "undefined" ? API_ORIGIN : "same-origin Next.js proxy",
+);
 console.log("Environment:", process.env.NODE_ENV);
 console.log("==============================");
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
