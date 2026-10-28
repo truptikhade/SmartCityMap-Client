@@ -112,6 +112,7 @@ export default function PassengerRidePage() {
       const otp = String(storedRideData?.otp || "").trim();
 
       if (/^\d{4}$/.test(otp)) {
+        // Restore the short lived ride OTP saved when the ride was created.
         setRideOtp(otp);
       }
 
@@ -130,7 +131,7 @@ export default function PassengerRidePage() {
     } catch (storageError) {
       console.error("Failed to restore active ride:", storageError);
     }
-  }, [rideId]);
+  }, [rideId, loadRide]);
 
   //
   // Load ride
@@ -233,7 +234,7 @@ export default function PassengerRidePage() {
     }
 
     loadRide(true);
-  }, [rideId]);
+  }, [rideId, loadRide]);
 
   //
   // Poll ride status

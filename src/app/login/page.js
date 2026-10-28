@@ -93,9 +93,12 @@ export default function Login() {
       <div className="flex w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl">
         {/* Left Side: Image (Hidden on mobile, visible on medium screens and up) */}
         <div className="hidden md:block md:w-1/2">
-          <img
+          <Image
             src="/login.jpg"
             alt="Login visual"
+            width={900}
+            height={1200}
+            priority
             className="h-full w-full object-cover"
           />
         </div>
@@ -208,7 +211,7 @@ export default function Login() {
           {/* REGISTER */}
 
           <p className="mt-6 text-center text-sm text-gray-500">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/register"
               className="font-medium text-mauve-700 transition hover:text-mauve-700"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Car,
@@ -48,12 +48,7 @@ export default function DriverProfilePage() {
     color: "",
   });
 
-  useEffect(() => {
-    loadProfile();
-    loadVehicleChangeRequests();
-  }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -87,9 +82,9 @@ export default function DriverProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadVehicleChangeRequests = async () => {
+  const loadVehicleChangeRequests = useCallback(async () => {
     try {
       const response = await getVehicleChangeRequestsAPI();
 
@@ -99,7 +94,14 @@ export default function DriverProfilePage() {
     } catch (error) {
       console.error("Failed to load vehicle change requests:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // These loaders start API requests and set the corresponding loading state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadProfile();
+    void loadVehicleChangeRequests();
+  }, [loadProfile, loadVehicleChangeRequests]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;

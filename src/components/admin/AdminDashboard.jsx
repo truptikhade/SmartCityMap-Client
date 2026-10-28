@@ -120,6 +120,8 @@ export default function AdminDashboard() {
       return;
     }
 
+    // These loaders begin external requests and synchronously set their loading state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDrivers();
     loadVehicleRequests();
   }, [

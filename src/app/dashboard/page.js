@@ -20,6 +20,8 @@ function DashboardContent() {
     if (!stored) return;
 
     try {
+      // Restore the one-time navigation payload from session storage.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setJourney(JSON.parse(stored));
     } catch (error) {
       console.error("Could not load route preview", error);

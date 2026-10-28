@@ -79,5 +79,4 @@ export const useSocket = (routeId) => {
     };
   }, [routeId, dispatch]);
 
-  return socketRef.current;
 };

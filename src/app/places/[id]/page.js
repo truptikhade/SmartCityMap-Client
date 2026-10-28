@@ -51,12 +51,6 @@ export default function PlaceDetailPage() {
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
   const [submitting, setSubmitting] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   useEffect(() => {
     if (!authLoading && !isAuthenticated) router.push("/login");
   }, [authLoading, isAuthenticated, router]);
@@ -260,7 +254,7 @@ export default function PlaceDetailPage() {
               Reviews ({reviews.length})
             </h2>
 
-            {mounted && isAuthenticated && (
+            {!authLoading && isAuthenticated && (
               <button
                 onClick={() => setShowReviewForm(!showReviewForm)}
                 className="text-xs bg-blue-600 hover:bg-blue-700 text-white

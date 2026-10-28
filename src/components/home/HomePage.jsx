@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -28,19 +28,14 @@ export default function HomePage() {
   const selectedTransport = useSelector((state) => state.map.selectedTransport);
   const selectedPlace = useSelector((state) => state.map.selectedPlace);
   const { user, isAuthenticated, loading: authLoading } = useAuth();
-  const [mounted, setMounted] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
-  // =====================================================
-  // CLIENT MOUNTED
-  // =====================================================
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [rideRequestPending, setRideRequestPending] = useState(false);
+  const rideRequestPendingRef = useRef(false);
   // =====================================================
   // AUTHENTICATION + ROLE ROUTING
   // =====================================================
   useEffect(() => {
-    if (!mounted || authLoading || !isAuthenticated) {
+    if (authLoading || !isAuthenticated) {
       return;
     }
 
@@ -53,12 +48,12 @@ export default function HomePage() {
     if (user?.role === "admin") {
       router.replace("/admin");
     }
-  }, [mounted, authLoading, isAuthenticated, user?.role, router]);
+  }, [authLoading, isAuthenticated, user?.role, router]);
   // =====================================================
   // USER LOCATION
   // =====================================================
   useEffect(() => {
-    if (!mounted || !isAuthenticated || user?.role !== "user" || userLocation) {
+    if (authLoading || !isAuthenticated || user?.role !== "user" || userLocation) {
       return;
     }
     if (!navigator.geolocation) {
@@ -93,7 +88,7 @@ export default function HomePage() {
         maximumAge: 300000,
       },
     );
-  }, [mounted, isAuthenticated, user?.role, userLocation, dispatch]);
+  }, [authLoading, isAuthenticated, user?.role, userLocation, dispatch]);
   // =====================================================
   // JOURNEY SEARCH
   // =====================================================
@@ -196,6 +191,8 @@ export default function HomePage() {
     // CAR / TWO WHEELER / AUTO
     // ===================================================
     if (isRoadTransport) {
+      if (rideRequestPendingRef.current) return;
+
       if (!isAuthenticated) {
         toast.error("Please sign in before requesting a ride");
         router.push("/login");
@@ -245,6 +242,8 @@ export default function HomePage() {
           0,
       );
       try {
+        rideRequestPendingRef.current = true;
+        setRideRequestPending(true);
         const payload = {
           pickupLat: fromLat,
           pickupLng: fromLng,
@@ -295,6 +294,9 @@ export default function HomePage() {
             error?.message ||
             "Unable to request ride",
         );
+      } finally {
+        rideRequestPendingRef.current = false;
+        setRideRequestPending(false);
       }
       return;
     }
@@ -355,7 +357,7 @@ export default function HomePage() {
   // =====================================================
   // HYDRATION-SAFE LOADING
   // =====================================================
-  if (!mounted || authLoading) {
+  if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-sm text-gray-500">Loading...</div>
@@ -435,6 +437,7 @@ export default function HomePage() {
                   journey={journey}
                   onBook={handleBook}
                   onViewMap={handleTransportMap}
+                  booking={rideRequestPending}
                 />
               )}
             </div>

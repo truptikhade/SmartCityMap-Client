@@ -112,6 +112,8 @@ export default function BookingPage() {
       console.log("BOOKING DATA LOADED:", normalizedData);
       console.log("SELECTED ROUTE ID:", normalizedRouteId);
       console.log("SELECTED TRIP ID:", normalizedTripId);
+      // Restore booking details after navigation from the route picker.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBookingData(normalizedData);
       setBoardingStop(data.boardingStop?.id || data.boardingStopId || "");
       setDropStop(data.dropStop?.id || data.dropStopId || "");
@@ -216,6 +218,8 @@ export default function BookingPage() {
 
   useEffect(() => {
     if (!isTrain || !tripId) {
+      // Clear train-only data when the selected trip is no longer a train.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSeatInventory(null);
       return;
     }
@@ -228,11 +232,13 @@ export default function BookingPage() {
         if (cancelled) return;
         const inventory = response.data?.data;
         setSeatInventory(inventory || null);
-        if (
-          inventory?.unavailableSeats?.includes(String(seatNumber).trim())
-        ) {
-          setSeatNumber("");
-        }
+        setSeatNumber((currentSeatNumber) =>
+          inventory?.unavailableSeats?.includes(
+            String(currentSeatNumber).trim(),
+          )
+            ? ""
+            : currentSeatNumber,
+        );
       } catch (error) {
         if (!cancelled) {
           console.error("Could not load train seat inventory:", error);

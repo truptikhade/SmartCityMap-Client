@@ -81,14 +81,16 @@ function SelectedPlaceController({ selectedPlace }) {
 
 function InitialCenterController({ center, hasJourney, hasSelectedPlace }) {
   const map = useMap();
+  const centerLat = center[0];
+  const centerLng = center[1];
 
   useEffect(() => {
     if (hasJourney || hasSelectedPlace) {
       return;
     }
 
-    map.setView(center, map.getZoom(), { animate: true });
-  }, [center[0], center[1], hasJourney, hasSelectedPlace, map]);
+    map.setView([centerLat, centerLng], map.getZoom(), { animate: true });
+  }, [centerLat, centerLng, hasJourney, hasSelectedPlace, map]);
 
   return null;
 }
@@ -108,6 +110,8 @@ function RoadRouteController({ journey, selectedTransport, onRoutesChange }) {
 
   useEffect(() => {
     if (!journey) {
+      // Remove stale route results when the user clears their journey.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRoadRoutes([]);
       onRoutesChange([]);
       return;
@@ -267,6 +271,7 @@ function RoadRouteController({ journey, selectedTransport, onRoutesChange }) {
     journey,
     selectedTransport?.roadRoutes,
     selectedTransport?.transportType,
+    selectedTransport?.transitType,
     onRoutesChange,
     map,
   ]);

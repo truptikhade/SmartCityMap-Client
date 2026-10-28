@@ -75,6 +75,8 @@ export default function DriverDashboard() {
   //
 
   useEffect(() => {
+    // The loader starts the dashboard request and sets its loading indicator.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDashboard();
   }, [loadDashboard]);
 
@@ -98,6 +100,8 @@ export default function DriverDashboard() {
 
     if (!isAvailable) {
       disconnectDriverSocket();
+      // Reflect the socket state after disabling driver availability.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSocketConnected(false);
 
       return;

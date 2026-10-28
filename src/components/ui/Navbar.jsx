@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -22,11 +21,6 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const { user, isAuthenticated, loading: authLoading, logout } = useAuth();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Drivers have their own dedicated dashboard header.
   if (pathname === "/driver") {
@@ -34,7 +28,7 @@ export default function Navbar() {
   }
 
   // Avoid rendering different auth navigation before hydration.
-  const authenticated = mounted && !authLoading && isAuthenticated;
+  const authenticated = !authLoading && isAuthenticated;
   const role = authenticated ? user?.role : null;
 
   const isAdmin = role === "admin";
@@ -70,7 +64,7 @@ export default function Navbar() {
         {/* Navigation */}
         {/* 2. Added gap-2 to evenly control spacing between nav items without large gaps */}
         <div className="flex items-center gap-2">
-          {!mounted || authLoading ? null : !authenticated ? (
+          {authLoading ? null : !authenticated ? (
             <>
               {/* Public visitor navigation */}
               <Link href="/login" className={linkClass}>

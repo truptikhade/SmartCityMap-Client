@@ -54,6 +54,8 @@ export default function TransitRouteMapClient({
 
   useEffect(() => {
     if (!routeId) {
+      // No route means the initial loading state is already complete.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       return;
     }
@@ -140,7 +142,7 @@ export default function TransitRouteMapClient({
     [data],
   );
 
-  const vehicles = data?.vehicles || [];
+  const vehicles = useMemo(() => data?.vehicles || [], [data?.vehicles]);
 
   const liveVehicles = useMemo(
     () =>

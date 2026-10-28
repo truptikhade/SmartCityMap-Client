@@ -11,17 +11,16 @@ import { verifyEmailAPI } from "../../api/auth.api";
 function VerifyEmailForm() {
   const searchParams = useSearchParams();
 
-  const [status, setStatus] = useState("verifying");
-  const [message, setMessage] = useState("Verifying your email address...");
+  const token = searchParams.get("token");
+  const [status, setStatus] = useState(token ? "verifying" : "error");
+  const [message, setMessage] = useState(
+    token
+      ? "Verifying your email address..."
+      : "This verification link is invalid or incomplete.",
+  );
 
   useEffect(() => {
-    const token = searchParams.get("token");
-
-    if (!token) {
-      setStatus("error");
-      setMessage("This verification link is invalid or incomplete.");
-      return;
-    }
+    if (!token) return;
 
     const verifyEmail = async () => {
       try {
@@ -44,7 +43,7 @@ function VerifyEmailForm() {
     };
 
     verifyEmail();
-  }, [searchParams]);
+  }, [token]);
 
   return (
     <main className="min-h-screen bg-gray-50">

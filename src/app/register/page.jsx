@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -279,9 +280,12 @@ function RegisterForm() {
       <div className="flex w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-xl">
         {/* Left — illustration (same as login) */}
         <div className="relative hidden w-[45%] md:block">
-          <img
+          <Image
             src="/loginBackGround.jpg"
             alt="Registration Visuals"
+            width={900}
+            height={1200}
+            priority
             className="h-full w-full object-cover"
           />
         </div>

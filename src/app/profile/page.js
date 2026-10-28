@@ -51,7 +51,6 @@ export default function ProfilePage() {
 
   const [currentPassword, setCurrentPassword] = useState("");
 
-  const [mounted, setMounted] = useState(false);
 
   const [formData, setFormData] = useState({
     fname: "",
@@ -62,10 +61,6 @@ export default function ProfilePage() {
   /* ======
      MOUNTED
      ====== */
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   /* ======
      AUTHENTICATION + ROLE REDIRECT
@@ -333,9 +328,7 @@ export default function ProfilePage() {
                     Welcome back
                   </p>
                   <p className="mt-1 truncate text-lg font-semibold">
-                    {mounted
-                      ? `${profile.fname} ${profile.lname || ""}`.trim()
-                      : ""}
+                    {`${profile.fname} ${profile.lname || ""}`.trim()}
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-medium capitalize text-mauve-100">
@@ -376,9 +369,7 @@ export default function ProfilePage() {
 
                   <div>
                     <h1 className="text-xl font-bold text-gray-950">
-                      {mounted
-                        ? `${profile.fname} ${profile.lname || ""}`.trim()
-                        : ""}
+                      {`${profile.fname} ${profile.lname || ""}`.trim()}
                     </h1>
 
                     <span
@@ -471,7 +462,7 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
                         <User size={14} className="text-gray-400" />
 
-                        {mounted ? profile.fname : ""}
+                        {profile.fname}
                       </div>
                     )}
                   </div>
@@ -498,7 +489,7 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
                         <User size={14} className="text-gray-400" />
 
-                        {mounted ? profile.lname || "—" : ""}
+                        {profile.lname || "—"}
                       </div>
                     )}
                   </div>
@@ -513,7 +504,7 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
                     <Mail size={14} className="text-gray-400" />
 
-                    {mounted ? profile.email : ""}
+                    {profile.email}
                   </div>
                 </div>
 
@@ -526,7 +517,7 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
                     <Phone size={14} className="text-gray-400" />
 
-                    {mounted ? profile.phone : ""}
+                    {profile.phone}
                   </div>
                 </div>
 
@@ -553,7 +544,7 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
                       <MapPin size={14} className="text-gray-400" />
 
-                      {mounted ? profile.homeAddress || "Not set" : ""}
+                      {profile.homeAddress || "Not set"}
                     </div>
                   )}
                 </div>
@@ -614,7 +605,7 @@ export default function ProfilePage() {
                   <span className="text-sm text-gray-500">Member Since</span>
 
                   <span className="text-sm font-medium text-gray-900">
-                    {mounted && profile.createdAt
+                    {profile.createdAt
                       ? new Date(profile.createdAt).toLocaleDateString(
                           "en-IN",
                           {
@@ -632,7 +623,7 @@ export default function ProfilePage() {
                   <span className="text-sm text-gray-500">Last Login</span>
 
                   <span className="text-sm font-medium text-gray-900">
-                    {mounted && profile.lastLogin
+                    {profile.lastLogin
                       ? new Date(profile.lastLogin).toLocaleDateString(
                           "en-IN",
                           {

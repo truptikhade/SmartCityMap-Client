@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ShieldCheck, X } from "lucide-react";
 
 export default function DriverOtpModal({
@@ -11,11 +10,7 @@ export default function DriverOtpModal({
   onClose,
   isLoading = false,
 }) {
-  const [localOtp, setLocalOtp] = useState(otp || "");
-
-  useEffect(() => {
-    setLocalOtp(otp || "");
-  }, [otp, isOpen]);
+  const localOtp = otp || "";
 
   if (!isOpen) {
     return null;
@@ -23,8 +18,6 @@ export default function DriverOtpModal({
 
   const handleChange = (event) => {
     const value = event.target.value.replace(/\D/g, "").slice(0, 6);
-
-    setLocalOtp(value);
 
     if (onOtpChange) {
       onOtpChange(value);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   CheckCircle2,
   Clock3,
@@ -34,15 +34,7 @@ export default function ActiveRideCard({ ride, onRideUpdated }) {
 
   const [finalFare, setFinalFare] = useState("");
 
-  const [currentRide, setCurrentRide] = useState(ride);
-
-  //
-  // Sync ride with parent / Socket.IO updates
-  //
-
-  useEffect(() => {
-    setCurrentRide(ride);
-  }, [ride]);
+  const currentRide = ride;
 
   if (!currentRide) {
     return null;
@@ -60,8 +52,6 @@ export default function ActiveRideCard({ ride, onRideUpdated }) {
     if (!updatedRide) {
       return;
     }
-
-    setCurrentRide(updatedRide);
 
     if (onRideUpdated) {
       onRideUpdated(updatedRide);

@@ -23,7 +23,7 @@ function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [token, setToken] = useState("");
+  const token = searchParams.get("token") || "";
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -32,14 +32,6 @@ function ResetPasswordForm() {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    const resetToken = searchParams.get("token");
-
-    if (resetToken) {
-      setToken(resetToken);
-    }
-  }, [searchParams]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();

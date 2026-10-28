@@ -17,7 +17,12 @@ import {
 
 const MAX_ROAD_ROUTES = 3;
 
-export default function TransportOptions({ journey, onBook, onViewMap }) {
+export default function TransportOptions({
+  journey,
+  onBook,
+  onViewMap,
+  booking = false,
+}) {
   const selectedTransport = useSelector((state) => state.map.selectedTransport);
 
   const [roadRoutes, setRoadRoutes] = useState([]);
@@ -25,6 +30,8 @@ export default function TransportOptions({ journey, onBook, onViewMap }) {
 
   useEffect(() => {
     if (!journey) {
+      // Discard route results when there is no active journey.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRoadRoutes([]);
       return;
     }
@@ -228,6 +235,7 @@ export default function TransportOptions({ journey, onBook, onViewMap }) {
             journey={journey}
             onBook={onBook}
             onViewMap={onViewMap}
+            booking={booking}
             roadLoading={roadLoading}
             roadRoutes={roadRoutes}
             selectedRoadRoute={selectedRoadRoute}
@@ -344,6 +352,7 @@ function TransportCard({
   journey,
   onBook,
   onViewMap,
+  booking,
   roadLoading,
   roadRoutes,
   selectedRoadRoute,
@@ -571,11 +580,11 @@ function TransportCard({
               (isRoadTransport ? (
                 <button
                   type="button"
-                  disabled={roadLoading || !route}
+                  disabled={roadLoading || !route || booking}
                   onClick={handleBookRoad}
                   className="ml-auto flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Book
+                  {booking ? "Requesting…" : "Book"}
                   <ArrowRight size={15} />
                 </button>
               ) : (

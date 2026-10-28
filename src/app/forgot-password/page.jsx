@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
 
                 <p className="mt-1.5 text-sm leading-5 text-gray-500">
                   Enter the email address associated with your SmartCity account
-                  and we'll send you instructions to reset your password.
+                  and we&apos;ll send you instructions to reset your password.
                 </p>
               </div>
 

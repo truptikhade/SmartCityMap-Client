@@ -103,6 +103,8 @@ export default function JourneySearch({
       if (!saved) return;
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
+        // Hydrate recent searches from browser storage on mount.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setRecentSearches(parsed);
       }
     } catch (error) {
