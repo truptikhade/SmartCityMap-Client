@@ -338,7 +338,7 @@ function RegisterForm() {
                         name="fname"
                         value={form.fname}
                         onChange={handleChange}
-                        placeholder="Rahul"
+                        placeholder="Name"
                         autoComplete="given-name"
                         disabled={loading}
                         className={inputWithIcon}
@@ -351,7 +351,7 @@ function RegisterForm() {
                         name="lname"
                         value={form.lname}
                         onChange={handleChange}
-                        placeholder="Patil"
+                        placeholder="Surname"
                         autoComplete="family-name"
                         disabled={loading}
                         className={inputClass}
