@@ -27,6 +27,7 @@ import {
   Shield,
   Sparkles,
   ArrowRight,
+  LogOut,
 } from "lucide-react";
 
 import toast from "react-hot-toast";
@@ -50,7 +51,6 @@ export default function ProfilePage() {
   const [deleting, setDeleting] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
-
 
   const [formData, setFormData] = useState({
     fname: "",
@@ -199,6 +199,12 @@ export default function ProfilePage() {
     });
 
     setEditing(false);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    toast.success("Logged out");
+    router.replace("/");
   };
 
   const handleDeleteAccount = async () => {
@@ -554,125 +560,140 @@ export default function ProfilePage() {
               ACCOUNT INFO
               ================================================== */}
 
-            <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-              <div className="mb-5 flex items-center gap-3 border-b border-gray-100 pb-4">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-mauve-50 text-mauve-700">
-                  <Shield size={17} />
-                </span>
+            <div className="space-y-5">
+              <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+                <div className="mb-5 flex items-center gap-3 border-b border-gray-100 pb-4">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-mauve-50 text-mauve-700">
+                    <Shield size={17} />
+                  </span>
+                  <div>
+                    <h2 className="text-sm font-semibold text-gray-950">
+                      Account Info
+                    </h2>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      Your account standing and activity
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* VERIFICATION */}
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-sm text-gray-500">Verification</span>
+
+                    <span
+                      className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                        profile.isVerified
+                          ? "border-green-200 bg-green-50 text-green-700"
+                          : "border-yellow-200 bg-yellow-50 text-yellow-700"
+                      }`}
+                    >
+                      {profile.isVerified ? "Verified" : "Not Verified"}
+                    </span>
+                  </div>
+
+                  {/* ACCOUNT STATUS */}
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-sm text-gray-500">
+                      Account Status
+                    </span>
+
+                    <span
+                      className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                        profile.isActive === false
+                          ? "border-mauve-200 bg-mauve-50 text-mauve-700"
+                          : "border-green-200 bg-green-50 text-green-700"
+                      }`}
+                    >
+                      {profile.isActive === false ? "Inactive" : "Active"}
+                    </span>
+                  </div>
+
+                  {/* MEMBER SINCE */}
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-sm text-gray-500">Member Since</span>
+
+                    <span className="text-sm font-medium text-gray-900">
+                      {profile.createdAt
+                        ? new Date(profile.createdAt).toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )
+                        : "—"}
+                    </span>
+                  </div>
+
+                  {/* LAST LOGIN */}
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-sm text-gray-500">Last Login</span>
+
+                    <span className="text-sm font-medium text-gray-900">
+                      {profile.lastLogin
+                        ? new Date(profile.lastLogin).toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )
+                        : "—"}
+                    </span>
+                  </div>
+
+                  <div className="border-t border-gray-100 pt-4">
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                    >
+                      <LogOut size={16} />
+                      Log out
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <section className="flex flex-col gap-3 rounded-2xl border border-mauve-200 bg-white p-5 shadow-sm">
+                <h2 className="text-sm font-semibold text-mauve-700">
+                  Deactivate account
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Your account will be disabled and you will be signed out. Your
+                  bookings, reviews, and other records will be retained.
+                </p>
                 <div>
-                  <h2 className="text-sm font-semibold text-gray-950">
-                    Account Info
-                  </h2>
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    Your account standing and activity
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {/* VERIFICATION */}
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-sm text-gray-500">Verification</span>
-
-                  <span
-                    className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                      profile.isVerified
-                        ? "border-green-200 bg-green-50 text-green-700"
-                        : "border-yellow-200 bg-yellow-50 text-yellow-700"
-                    }`}
+                  <label
+                    htmlFor="delete-account-password"
+                    className="block text-xs font-medium text-gray-600"
                   >
-                    {profile.isVerified ? "Verified" : "Not Verified"}
-                  </span>
+                    Confirm your password
+                  </label>
+                  <input
+                    id="delete-account-password"
+                    type="password"
+                    autoComplete="current-password"
+                    value={currentPassword}
+                    onChange={(event) => setCurrentPassword(event.target.value)}
+                    className="mt-1.5 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-mauve-400 focus:ring-2 focus:ring-mauve-100 sm:max-w-sm"
+                  />
                 </div>
-
-                {/* ACCOUNT STATUS */}
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-sm text-gray-500">Account Status</span>
-
-                  <span
-                    className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                      profile.isActive === false
-                        ? "border-mauve-200 bg-mauve-50 text-mauve-700"
-                        : "border-green-200 bg-green-50 text-green-700"
-                    }`}
+                <div>
+                  <button
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    disabled={deleting || !currentPassword}
+                    className="rounded-lg bg-mauve-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-mauve-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {profile.isActive === false ? "Inactive" : "Active"}
-                  </span>
+                    {deleting ? "Deactivating..." : "Deactivate my account"}
+                  </button>
                 </div>
-
-                {/* MEMBER SINCE */}
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-sm text-gray-500">Member Since</span>
-
-                  <span className="text-sm font-medium text-gray-900">
-                    {profile.createdAt
-                      ? new Date(profile.createdAt).toLocaleDateString(
-                          "en-IN",
-                          {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          },
-                        )
-                      : "—"}
-                  </span>
-                </div>
-
-                {/* LAST LOGIN */}
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-sm text-gray-500">Last Login</span>
-
-                  <span className="text-sm font-medium text-gray-900">
-                    {profile.lastLogin
-                      ? new Date(profile.lastLogin).toLocaleDateString(
-                          "en-IN",
-                          {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          },
-                        )
-                      : "—"}
-                  </span>
-                </div>
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-mauve-200 bg-white p-5 flex flex-col gap-3 shadow-sm">
-              <h2 className="text-sm font-semibold text-mauve-700">
-                Deactivate account
-              </h2>
-              <p className="text-sm text-gray-600">
-                Your account will be disabled and you will be signed out. Your
-                bookings, reviews, and other records will be retained.
-              </p>
-              <div>
-                <label
-                  htmlFor="delete-account-password"
-                  className="block text-xs font-medium text-gray-600"
-                >
-                  Confirm your password
-                </label>
-                <input
-                  id="delete-account-password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={currentPassword}
-                  onChange={(event) => setCurrentPassword(event.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-mauve-400 focus:ring-2 focus:ring-mauve-100 sm:max-w-sm"
-                />
-              </div>
-              <div>
-                <button
-                  type="button"
-                  onClick={handleDeleteAccount}
-                  disabled={deleting || !currentPassword}
-                  className="rounded-lg bg-mauve-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-mauve-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {deleting ? "Deactivating..." : "Deactivate my account"}
-                </button>
-              </div>
-            </section>
+              </section>
+            </div>
           </div>
         </div>
       </main>

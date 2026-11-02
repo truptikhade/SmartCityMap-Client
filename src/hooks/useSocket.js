@@ -5,78 +5,87 @@ import { useDispatch } from "react-redux";
 import { updateLiveBus } from "../store/mapSlice";
 
 const SOCKET_URL = (
-  process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000"
-)
-  .replace(/\/+$/, "")
-  .replace(/\/api$/i, "");
+  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:9000"
+).replace(/\/+$/, "");
+
+const AUTH_ERRORS = [
+  "Authentication required",
+  "Invalid authentication token",
+  "Invalid or expired token",
+  "User account not found",
+  "Your account is deactivated",
+];
 
 export const useSocket = (routeId) => {
   const dispatch = useDispatch();
   const socketRef = useRef(null);
 
   useEffect(() => {
-    if (!routeId) return;
+    if (!routeId || typeof window === "undefined") return;
 
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-    if (!token) {
+    if (!localStorage.getItem("token")) {
       console.warn("useSocket: no token found");
       return;
     }
 
-    // Connect
-    socketRef.current = io(SOCKET_URL, {
-      auth: { token },
-      transports: ["websocket", "polling"],
+    const socket = io(SOCKET_URL, {
+      // Called on every connect and reconnect, so a refreshed token is used.
+      auth: (cb) => cb({ token: localStorage.getItem("token") }),
+      transports: ["websocket"],
       reconnection: true,
       reconnectionDelay: 2000,
     });
 
-    socketRef.current.on("connect", () => {
-      console.log(" Socket connected:", socketRef.current.id);
-      // ← matches tracking.socket.js 'route:join' handler
-      socketRef.current.emit("route:join", routeId);
-      console.log(` Joined route room: route:${routeId}`);
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+      // Runs on the first connect and every reconnect, since rooms
+      // are lost when the connection drops.
+      socket.emit("route:join", routeId);
     });
 
-    socketRef.current.on("connect_error", (err) => {
+    socket.on("connect_error", (err) => {
       console.error("Socket connect error:", err.message);
-    });
 
-    socketRef.current.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
-    });
-
-    // ← matches tracking.socket.js + simulator 'vehicle:location' event
-    socketRef.current.on("vehicle:location", (data) => {
-      if (data.tripId) {
-        dispatch(
-          updateLiveBus({
-            tripId: data.tripId,
-            lat: data.lat,
-            lng: data.lng,
-            currentStop: data.currentStop,
-            nextStop: data.nextStop,
-            speedKmph: data.speedKmph,
-          }),
-        );
+      // Stop retrying when the server rejects the token.
+      if (AUTH_ERRORS.includes(err.message)) {
+        socket.disconnect();
       }
     });
 
-    // Booking cancelled notification
-    socketRef.current.on("booking:cancelled", (data) => {
+    socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
+    });
+
+    socket.on("vehicle:location", (data) => {
+      if (!data?.tripId) return;
+
+      dispatch(
+        updateLiveBus({
+          tripId: data.tripId,
+          lat: data.lat,
+          lng: data.lng,
+          currentStop: data.currentStop,
+          nextStop: data.nextStop,
+          speedKmph: data.speedKmph,
+        }),
+      );
+    });
+
+    socket.on("booking:cancelled", (data) => {
       console.log("Booking cancelled:", data);
     });
 
     return () => {
-      if (socketRef.current) {
-        socketRef.current.emit("route:leave", routeId);
-        socketRef.current.disconnect();
-        socketRef.current = null;
-        console.log(` Left route room: route:${routeId}`);
+      if (socket.connected) {
+        socket.emit("route:leave", routeId);
       }
+      socket.off();
+      socket.disconnect();
+      socketRef.current = null;
     };
   }, [routeId, dispatch]);
 
+  return socketRef;
 };

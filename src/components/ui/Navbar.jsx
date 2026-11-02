@@ -1,26 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   MapPinned,
-  Ticket,
   User,
-  LogOut,
   LogIn,
   UserPlus,
   LayoutDashboard,
   Users,
 } from "lucide-react";
-import toast from "react-hot-toast";
 
 import { useAuth } from "../../hooks/useAuth";
 
 export default function Navbar() {
-  const router = useRouter();
   const pathname = usePathname();
 
-  const { user, isAuthenticated, loading: authLoading, logout } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
 
   // Drivers have their own dedicated dashboard header.
   if (pathname === "/driver") {
@@ -35,12 +31,6 @@ export default function Navbar() {
   const isPassenger = role === "user";
 
   const homePath = isAdmin ? "/admin" : "/";
-
-  const onLogout = () => {
-    logout();
-    toast.success("Logged out");
-    router.replace("/");
-  };
 
   const linkClass =
     "inline-flex items-center gap-3 rounded-md px-1 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-950";
@@ -92,7 +82,7 @@ export default function Navbar() {
               {/* Passenger navigation */}
               {isPassenger && (
                 <Link href="/bookings" className={linkClass}>
-                  <Ticket size={16} />
+                  {/* <Ticket size={16} /> */}
                   <span className="hidden sm:inline">Bookings</span>
                 </Link>
               )}
@@ -106,18 +96,6 @@ export default function Navbar() {
                 </span>
               </Link>
 
-              {/* Logout */}
-              {/* Note: Removed ml-1 since the parent container's gap-2 handles this now */}
-              <button
-                type="button"
-                onClick={onLogout}
-                className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold
-                 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
-              >
-                <LogOut size={16} />
-
-                <span className="hidden sm:inline">Logout</span>
-              </button>
             </>
           )}
         </div>

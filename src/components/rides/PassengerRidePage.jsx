@@ -1,5 +1,11 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   ArrowLeft,
   Car,
@@ -20,6 +26,7 @@ import { cancelRideAPI, getRideAPI } from "../../api/ride.api";
 
 const POLL_INTERVAL = 15000;
 const RATE_LIMIT_RETRY_INTERVAL = 60000;
+const TERMINAL_STATUSES = ["COMPLETED", "CANCELLED", "REJECTED"];
 
 const STATUS_CONFIG = {
   REQUESTED: {
@@ -74,67 +81,40 @@ export default function PassengerRidePage() {
 
   const rideId = params?.rideId;
 
-  const [ride, setRide] = useState(null);
-  const [rideOtp, setRideOtp] = useState("");
+  const [fetchedRide, setFetchedRide] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState("");
 
   //
-  // Restore OTP from the ride created by the passenger
+  // Restored ride from sessionStorage (read, not copied into state)
   //
 
-  useEffect(() => {
-    if (!rideId) {
-      return;
-    }
+  const storedRaw = useSyncExternalStore(
+    subscribeToSession,
+    getStoredRideRaw,
+    () => null, // server snapshot: nothing stored during SSR
+  );
 
-    try {
-      const storedRide = sessionStorage.getItem("activeRide");
+  const storedRide = useMemo(
+    () => parseStoredRide(storedRaw, rideId),
+    [storedRaw, rideId],
+  );
 
-      if (!storedRide) {
-        return;
-      }
+  // The plain OTP is only available from the stored ride.
+  const rideOtp = useMemo(() => {
+    const otp = String(storedRide?.otp || "").trim();
+    return /^\d{4}$/.test(otp) ? otp : "";
+  }, [storedRide]);
 
-      const parsed = JSON.parse(storedRide);
-
-      const storedRideData = parsed?.ride;
-
-      if (String(storedRideData?.id) !== String(rideId)) {
-        return;
-      }
-
-      /*
-       * OTP is returned only when the ride is created.
-       * The GET /api/rides/:id endpoint does not return
-       * the plain OTP, so keep it separately from ride state.
-       */
-      const otp = String(storedRideData?.otp || "").trim();
-
-      if (/^\d{4}$/.test(otp)) {
-        // Restore the short lived ride OTP saved when the ride was created.
-        setRideOtp(otp);
-      }
-
-      /*
-       * Use the locally stored ride immediately so
-       * the page can render even before the first API
-       * request completes.
-       */
-      setRide((currentRide) => {
-        if (currentRide) {
-          return currentRide;
-        }
-
-        return storedRideData || null;
-      });
-    } catch (storageError) {
-      console.error("Failed to restore active ride:", storageError);
-    }
-  }, [rideId, loadRide]);
+  // Stored ride is the base; fetched data overrides it.
+  const ride = useMemo(() => {
+    if (!storedRide && !fetchedRide) return null;
+    return { ...(storedRide || {}), ...(fetchedRide || {}) };
+  }, [storedRide, fetchedRide]);
 
   //
-  // Load ride
+  // Load ride (stable for the lifetime of rideId)
   //
 
   const loadRide = useCallback(
@@ -161,18 +141,12 @@ export default function PassengerRidePage() {
         }
 
         /*
-         * Important:
-         *
-         * Do NOT replace the entire ride state.
-         *
-         * The backend GET endpoint intentionally does
-         * not return the plain OTP.
-         *
-         * Merging keeps the locally restored ride OTP
-         * safe if it exists.
+         * Merge instead of replacing, so the stored
+         * fields (including OTP) are kept. The GET
+         * endpoint does not return the plain OTP.
          */
-        setRide((currentRide) => ({
-          ...(currentRide || {}),
+        setFetchedRide((current) => ({
+          ...(current || {}),
           ...data,
         }));
 
@@ -188,27 +162,21 @@ export default function PassengerRidePage() {
 
         const statusCode = err?.response?.status;
 
-        /*
-         * Rate limited:
-         * Do not immediately retry.
-         */
         if (statusCode === 429) {
           console.warn(
             "Ride polling was rate limited. Retrying after 60 seconds.",
           );
+
           return {
             success: false,
             rateLimited: true,
             ride: null,
           };
         }
-        /*
-         * Keep the locally restored ride visible
-         * if the API temporarily fails.
-         */
-        if (!ride) {
-          setError(err?.response?.data?.message || "Unable to load ride");
-        }
+
+        // The error screen only renders when there is no ride,
+        // so it's safe to always set the message here.
+        setError(err?.response?.data?.message || "Unable to load ride");
 
         return {
           success: false,
@@ -221,23 +189,12 @@ export default function PassengerRidePage() {
         }
       }
     },
-    [rideId, ride],
+    [rideId],
   );
 
   //
-  // Initial load
-  //
-
-  useEffect(() => {
-    if (!rideId) {
-      return;
-    }
-
-    loadRide(true);
-  }, [rideId, loadRide]);
-
-  //
-  // Poll ride status
+  // Single polling loop: load immediately, then repeat
+  // until the ride reaches a terminal status
   //
 
   useEffect(() => {
@@ -248,14 +205,8 @@ export default function PassengerRidePage() {
     let cancelled = false;
     let timer = null;
 
-    const terminalStatuses = ["COMPLETED", "CANCELLED", "REJECTED"];
-
-    const poll = async () => {
-      if (cancelled) {
-        return;
-      }
-
-      const result = await loadRide(false);
+    const poll = async (showLoader) => {
+      const result = await loadRide(showLoader);
 
       if (cancelled) {
         return;
@@ -263,33 +214,17 @@ export default function PassengerRidePage() {
 
       const currentStatus = String(result?.ride?.status || "").toUpperCase();
 
-      /*
-       * Stop polling once the ride reaches
-       * a terminal state.
-       */
-      if (terminalStatuses.includes(currentStatus)) {
+      if (TERMINAL_STATUSES.includes(currentStatus)) {
         return;
       }
 
-      /*
-       * Normal polling:
-       * 15 seconds
-       *
-       * Rate limited:
-       * 60 seconds
-       */
-      const nextDelay = result?.rateLimited
-        ? RATE_LIMIT_RETRY_INTERVAL
-        : POLL_INTERVAL;
-
-      timer = setTimeout(poll, nextDelay);
+      timer = setTimeout(
+        () => poll(false),
+        result.rateLimited ? RATE_LIMIT_RETRY_INTERVAL : POLL_INTERVAL,
+      );
     };
 
-    /*
-     * Don't immediately hit the API again.
-     * The initial load already happens separately.
-     */
-    timer = setTimeout(poll, POLL_INTERVAL);
+    poll(true);
 
     return () => {
       cancelled = true;
@@ -325,8 +260,8 @@ export default function PassengerRidePage() {
       const updatedRide = response?.data || response?.ride;
 
       if (updatedRide) {
-        setRide((currentRide) => ({
-          ...(currentRide || {}),
+        setFetchedRide((current) => ({
+          ...(current || {}),
           ...updatedRide,
         }));
       } else {
@@ -351,8 +286,7 @@ export default function PassengerRidePage() {
 
   const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.REQUESTED;
 
-  const isTerminal =
-    status === "COMPLETED" || status === "CANCELLED" || status === "REJECTED";
+  const isTerminal = TERMINAL_STATUSES.includes(status);
 
   /*
    * Backend permits cancellation while the driver
@@ -826,6 +760,39 @@ function InfoItem({ label, value }) {
 //
 // Helpers
 //
+
+function subscribeToSession() {
+  // sessionStorage has no change event within the same tab,
+  // so there is nothing to subscribe to.
+  return () => {};
+}
+
+function getStoredRideRaw() {
+  try {
+    return sessionStorage.getItem("activeRide");
+  } catch {
+    return null;
+  }
+}
+
+function parseStoredRide(raw, rideId) {
+  if (!raw || !rideId) {
+    return null;
+  }
+
+  try {
+    const stored = JSON.parse(raw)?.ride;
+
+    if (!stored || String(stored.id) !== String(rideId)) {
+      return null;
+    }
+
+    return stored;
+  } catch (err) {
+    console.error("Failed to parse stored ride:", err);
+    return null;
+  }
+}
 
 function getVehicleLabel(vehicleType) {
   const type = String(vehicleType || "").toLowerCase();
