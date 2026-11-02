@@ -42,12 +42,18 @@ api.interceptors.request.use((config) => {
       /\/api\/auth\/(?:login|register(?:\/driver)?|forgot-password|reset-password|verify-email|send-verification)\/?$/i.test(
         config.url || "",
       );
+    const isPublicReadRequest =
+      /^\/api\/(?:transit|places)(?:\/|$)/i.test(config.url || "");
     const hasAuthorizationHeader = Boolean(config.headers?.Authorization);
 
-    if (!isPublicAuthRequest && (hasAuthorizationHeader || token)) {
+    if (
+      !isPublicAuthRequest &&
+      !isPublicReadRequest &&
+      (hasAuthorizationHeader || token)
+    ) {
       config._authenticatedWithToken = true;
       if (!hasAuthorizationHeader) {
-        config.headers.Authorization = `Bearer ${token}`;
+        config.headers.Authorization = "Bearer " + token;
       }
       console.log("Authorization token attached");
     } else if (!token) {
