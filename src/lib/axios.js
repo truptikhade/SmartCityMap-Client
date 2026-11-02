@@ -5,12 +5,20 @@ const API_ORIGIN = (
 )
   .replace(/\/+$/, "")
   .replace(/\/api$/i, "");
-const API_BASE_URL = typeof window === "undefined" ? API_ORIGIN : "";
+const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL
+  ? API_ORIGIN
+  : typeof window === "undefined"
+    ? API_ORIGIN
+    : "";
 
 console.log("==============================");
 console.log(
   "SmartCity API requests:",
-  typeof window === "undefined" ? API_ORIGIN : "same-origin Next.js proxy",
+  process.env.NEXT_PUBLIC_SERVER_URL
+    ? API_ORIGIN
+    : typeof window === "undefined"
+      ? API_ORIGIN
+      : "same-origin Next.js proxy",
 );
 console.log("Environment:", process.env.NODE_ENV);
 console.log("==============================");
